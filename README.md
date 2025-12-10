@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Word Search Generator
 
-## Getting Started
+A modern, print-optimized Word Search Generator built with Next.js, TypeScript, and Tailwind CSS. Create custom puzzles with configurable difficulty, directions, and instant shareable links.
 
-First, run the development server:
+![Project Status](https://img.shields.io/badge/status-active-success.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🌟 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+-   **Dynamic Grid Generation**: Create puzzles from 5x5 up to 30x30.
+-   **Smart Placement Algorithm**: Automatically sorts and places words, handling collisions and retries.
+-   **Configurable Directions**: Toggle support for:
+    -   Horizontal & Vertical
+    -   Diagonals
+    -   Backwards (Reverse)
+-   **Difficulty Slider (Misspelled Distractors)**: Adds "fake" words (e.g., "TIGEK" instead of "TIGER") to increase challenge.
+-   **Print-Optimized**:
+    -   **Ink-Saving Mode**: No background colors or heavy borders.
+    -   **Auto-Scaling**: Fonts and grids automatically resize to fit A4/Letter pages.
+    -   **Smart Layout**: Dynamic margins and word bank sizing to prevent overflow.
+    -   **Answer Key**: Automatically generates a second page with the solution (ink-friendly format).
+-   **State Sharing**: All settings (title, words, config) are synced to the URL, making puzzles easy to bookmark or share.
+-   **Overflow Detection**: Warns you if your word list is too long for the selected grid size.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+-   **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+-   **Language**: [TypeScript](https://www.typescriptlang.org/)
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+-   **State Management**: [nuqs](https://nuqs.47ng.com/) (URL-based state)
+-   **Icons**: [Lucide React](https://lucide.dev/)
 
-## Learn More
+## 🚀 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+-   Node.js 18+ installed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Installation
 
-## Deploy on Vercel
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/wordsearch-generator.git
+    cd wordsearch-generator
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3.  Run the development server:
+    ```bash
+    npm run dev
+    ```
+
+4.  Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📖 Usage Guide
+
+1.  **Configure**: Use the sidebar to set the Title, Grid Size (Width/Height), and Difficulty.
+2.  **Add Words**: Type your words into the "Word List" box (separated by commas or newlines).
+3.  **Customize**:
+    -   Enable/Disable **Backwards** or **Diagonals**.
+    -   Toggle **Grid Lines** for visual preference.
+    -   Toggle **Answer Key** to include a solution page.
+4.  **Print**: Click the **Print Puzzle** button (or Ctrl+P). The sidebar will vanish, and the puzzle will format perfectly for paper.
+
+## 🧩 How it Works
+
+### Placement Algorithm (`src/lib/generator.ts`)
+The engine places words longest-to-shortest to maximize fit. It attempts random coordinates and directions (based on your config) up to 100 times per word. If a word cannot fit, it is skipped (and a warning is shown).
+
+### Distractor Logic
+The "Difficulty" slider controls the density of "distractor" words. These are misspelled versions of your actual words placed into the grid to trick the solver, before the remaining empty spaces are filled with random letters.
+
+### Print Styling
+We use extensive `@media print` CSS overrides to:
+-   Hide UI controls.
+-   Force high-contrast black & white.
+-   Inject dynamic CSS variables (`--print-cell-size`) to scale the grid based on the page size.
+-   Force page breaks (`break-before-page`) for the answer key.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
