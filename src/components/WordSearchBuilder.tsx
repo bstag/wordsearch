@@ -1,0 +1,395 @@
+'use client';
+
+import React, { useEffect, useState, useCallback } from 'react';
+import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
+import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
+import { Printer, RefreshCw, Settings, Type } from 'lucide-react';
+
+export default function WordSearchBuilder() {
+  // State synced with URL
+  const [title, setTitle] = useQueryState('title', parseAsString.withDefault('My Word Search'));
+  const [width, setWidth] = useQueryState('width', parseAsInteger.withDefault(15));
+  const [height, setHeight] = useQueryState('height', parseAsInteger.withDefault(15));
+  const [wordsRaw, setWordsRaw] = useQueryState('words', parseAsString.withDefault('LION,TIGER,BEAR'));
+  const [allowBackwards, setAllowBackwards] = useQueryState('backwards', parseAsBoolean.withDefault(true));
+  const [allowDiagonals, setAllowDiagonals] = useQueryState('diagonals', parseAsBoolean.withDefault(true));
+  const [showGridLines, setShowGridLines] = useQueryState('gridLines', parseAsBoolean.withDefault(false));
+  const [showAnswerKey, setShowAnswerKey] = useQueryState('answerKey', parseAsBoolean.withDefault(true));
+  const [difficulty, setDifficulty] = useQueryState('difficulty', parseAsInteger.withDefault(5));
+
+  // Internal state for the generated puzzle
+  const [puzzle, setPuzzle] = useState<GeneratedPuzzle | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generate = useCallback(() => {
+    setIsGenerating(true);
+    // Small timeout to allow UI to update if it was blocking
+    setTimeout(() => {
+      const wordList = wordsRaw.split(/[\n,]+/).map(w => w.trim()).filter(w => w.length > 0);
+      const config = {
+        width,
+        height,
+        words: wordList,
+        allowBackwards,
+        allowDiagonals,
+        difficulty
+      };
+      const result = generatePuzzle(config);
+      setPuzzle(result);
+      setIsGenerating(false);
+    }, 10);
+  }, [width, height, wordsRaw, allowBackwards, allowDiagonals, difficulty]);
+
+  // Initial generation
+  useEffect(() => {
+    generate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount, then user triggers or we can auto-trigger on changes with debounce
+
+  // Debounced auto-generation on config changes could be nice, but let's stick to manual or effect-based
+  // Let's auto-generate when config changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      generate();
+    }, 500); // 500ms debounce
+    return () => clearTimeout(timer);
+  }, [width, height, wordsRaw, allowBackwards, allowDiagonals, difficulty, generate]);
+
+  // Check if a cell is part of a placed word
+  const isCellInSolution = (x: number, y: number) => {
+    if (!puzzle) return false;
+    return puzzle.placedWords.some(word => {
+      // Check if (x,y) lies on the line segment of the word
+      // This is a bit tricky with diagonal logic, let's iterate
+      // Simpler: Pre-calculate a solution grid or set
+      // For now, let's just do the math
+      
+      const dx = Math.sign(word.endX - word.startX);
+      const dy = Math.sign(word.endY - word.startY);
+      const length = Math.max(Math.abs(word.endX - word.startX), Math.abs(word.endY - word.startY)) + 1;
+      
+      for (let i = 0; i < length; i++) {
+        if (word.startX + i * dx === x && word.startY + i * dy === y) return true;
+      }
+      return false;
+    });
+  };
+
+  // Calculate dynamic cell size for print
+  // Max printable width ~180mm (approx 700px), max height ~240mm (approx 900px) minus headers
+  // Let's use 700px width and 600px height for the grid part to be safe
+  const maxPrintWidth = 700;
+  const maxPrintHeight = 600;
+  const printCellSize = Math.floor(Math.min(maxPrintWidth / width, maxPrintHeight / height));
+  const printFontSize = Math.floor(printCellSize * 0.65);
+
+  // Calculate dynamic word bank size
+  const wordCount = puzzle?.placedWords.length || 0;
+  const wordBankCols = 4;
+  const wordBankRows = Math.ceil(wordCount / wordBankCols);
+  const gridHeightPx = height * printCellSize;
+  // A4 printable height ~950px - grid - headers(~150px)
+  const availableForWords = 950 - gridHeightPx - 150;
+  
+  let printWordBankSize = 12; // Base size
+  if (wordBankRows > 0 && availableForWords > 0) {
+     // Target line height is roughly 1.5em
+     const maxPerLine = Math.floor(availableForWords / (wordBankRows * 1.5));
+     printWordBankSize = Math.min(14, Math.max(8, maxPerLine));
+  }
+
+  // Detect potential overflow
+  const isOverflowing = availableForWords < (wordBankRows * 1.5 * 8); // assuming min font size 8px
+
+  // Adjust title size if we have many words to save vertical space
+  const printTitleSize = wordCount > 20 ? '1.5rem' : '1.875rem'; // 2xl vs 3xl
+  const printTitleMargin = wordCount > 20 ? '1rem' : '2rem'; // mb-4 vs mb-8
+
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans"
+      style={{
+        // @ts-expect-error - Custom CSS property
+        '--print-cell-size': `${printCellSize}px`,
+        '--print-font-size': `${printFontSize}px`,
+        '--print-wordbank-size': `${printWordBankSize}px`,
+        '--print-title-size': printTitleSize,
+        '--print-title-margin': printTitleMargin,
+      }}
+    >
+      <div className="flex flex-col md:flex-row min-h-screen">
+        
+        {/* Configuration Sidebar - Hidden on Print */}
+        <div className="w-full md:w-80 bg-white border-r border-gray-200 p-6 flex-shrink-0 print:hidden overflow-y-auto h-screen sticky top-0">
+          <div className="mb-6 flex items-center gap-2 text-indigo-600">
+            <Settings className="w-6 h-6" />
+            <h1 className="text-xl font-bold">Config</h1>
+          </div>
+
+          <div className="space-y-6">
+            {/* Title */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Puzzle Title</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            {/* Grid Size */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Width</label>
+                <input
+                  type="number"
+                  min="5"
+                  max="30"
+                  value={width}
+                  onChange={(e) => setWidth(parseInt(e.target.value) || 15)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Height</label>
+                <input
+                  type="number"
+                  min="5"
+                  max="30"
+                  value={height}
+                  onChange={(e) => setHeight(parseInt(e.target.value) || 15)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+
+            {/* Options */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-gray-700">Directions</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="backwards"
+                  checked={allowBackwards}
+                  onChange={(e) => setAllowBackwards(e.target.checked)}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="backwards" className="text-sm text-gray-600">Allow Backwards</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="diagonals"
+                  checked={allowDiagonals}
+                  onChange={(e) => setAllowDiagonals(e.target.checked)}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="diagonals" className="text-sm text-gray-600">Allow Diagonals</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="gridLines"
+                  checked={showGridLines}
+                  onChange={(e) => setShowGridLines(e.target.checked)}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="gridLines" className="text-sm text-gray-600">Show Grid Lines</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="answerKey"
+                  checked={showAnswerKey}
+                  onChange={(e) => setShowAnswerKey(e.target.checked)}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="answerKey" className="text-sm text-gray-600">Include Answer Key</label>
+              </div>
+            </div>
+
+            {/* Difficulty */}
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium text-gray-700">Difficulty (Distractors)</label>
+                <span className="text-xs text-gray-500">{difficulty}/10</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="10"
+                value={difficulty}
+                onChange={(e) => setDifficulty(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
+            {/* Word List */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Type className="w-4 h-4" />
+                Word List
+              </label>
+              <textarea
+                value={wordsRaw}
+                onChange={(e) => setWordsRaw(e.target.value)}
+                rows={10}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm"
+                placeholder="Enter words separated by commas or newlines"
+              />
+              <p className="text-xs text-gray-500">
+                {wordsRaw.split(/[\n,]+/).filter(w => w.trim().length > 0).length} words
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-4 space-y-3">
+              <button
+                onClick={generate}
+                className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
+                Regenerate Puzzle
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <Printer className="w-4 h-4 mr-2" />
+                Print Puzzle
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Preview Area */}
+        <div className="flex-1 p-8 overflow-auto print:p-0 print:overflow-visible">
+          <div className="max-w-4xl mx-auto print:max-w-none print:w-full">
+            
+            {/* Puzzle Header */}
+            <div className="mb-8 text-center" style={{ marginBottom: 'var(--print-title-margin)' }}>
+              <h1 
+                className="text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider"
+                style={{ fontSize: 'var(--print-title-size)' }}
+              >
+                {title}
+              </h1>
+
+            </div>
+
+            {/* Grid */}
+            {puzzle && (
+              <div className="flex justify-center mb-10" style={{ marginBottom: 'var(--print-title-margin)' }}>
+                <div 
+                  className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
+                  style={{
+                    gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
+                    width: 'fit-content',
+                  }}
+                >
+                  {puzzle.grid.map((row, y) => (
+                    row.map((cell, x) => (
+                      <div
+                        key={`${x}-${y}`}
+                        className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-lg md:text-xl font-bold uppercase ${showGridLines ? 'border border-gray-300 print:border-gray-800' : ''} print:text-black`}
+                        style={{
+                          width: 'var(--print-cell-size)',
+                          height: 'var(--print-cell-size)',
+                          fontSize: 'var(--print-font-size)',
+                        }}
+                      >
+                        {cell}
+                      </div>
+                    ))
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Word Bank */}
+            <div className="mt-8" style={{ marginTop: 'var(--print-title-margin)' }}>
+              <h2 className="text-lg font-semibold mb-4 border-b border-gray-300 pb-2 print:text-black">Word Bank</h2>
+              
+              {isOverflowing && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-sm print:hidden flex items-start">
+                  <span className="font-bold mr-1">Warning:</span> 
+                  This puzzle may be too tall to fit on a single printed page. Try reducing the grid height or the number of words.
+                </div>
+              )}
+
+              <ul className="grid grid-cols-2 md:grid-cols-4 gap-2 print:grid-cols-4">
+                {puzzle?.placedWords.map((item, idx) => (
+                  <li 
+                    key={idx} 
+                    className="text-sm md:text-base print:text-black"
+                    style={{ fontSize: 'var(--print-wordbank-size)' }}
+                  >
+                    <span className="inline-block w-4 h-4 border border-gray-400 mr-2" style={{ width: '0.8em', height: '0.8em' }}></span>
+                    {item.word}
+                  </li>
+                ))}
+              </ul>
+              {puzzle?.placedWords.length !== wordsRaw.split(/[\n,]+/).filter(w => w.trim().length > 0).length && (
+                 <div className="mt-4 text-red-500 text-sm print:hidden">
+                   Warning: Some words could not be placed due to space constraints. Try increasing the grid size.
+                 </div>
+              )}
+            </div>
+
+            {/* Footer for Print */}
+            <div className="hidden print:block mt-12 text-center text-xs text-gray-400" style={{ marginTop: 'var(--print-title-margin)' }}>
+              Generated by WordSearchGen
+            </div>
+
+            {/* Answer Key Page */}
+            {showAnswerKey && puzzle && (
+              <div className="hidden print:block break-before-page mt-8">
+                <div className="mb-8 text-center">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider">Answer Key</h1>
+                  <div className="text-sm text-gray-500 mt-2">
+                    {title}
+                  </div>
+                </div>
+
+                <div className="flex justify-center mb-10">
+                  <div 
+                    className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
+                    style={{
+                      gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
+                      width: 'fit-content',
+                    }}
+                  >
+                    {puzzle.grid.map((row, y) => (
+                      row.map((cell, x) => {
+                        const isSolution = isCellInSolution(x, y);
+                        return (
+                          <div
+                            key={`${x}-${y}`}
+                            className={`w-9 h-9 flex items-center justify-center text-xl font-bold uppercase ${showGridLines ? 'border border-gray-800' : ''} text-black ${isSolution ? 'print:bg-transparent bg-gray-300' : ''}`}
+                            style={{
+                              width: 'var(--print-cell-size)',
+                              height: 'var(--print-cell-size)',
+                              fontSize: 'var(--print-font-size)',
+                            }}
+                          >
+                            <span className={isSolution ? 'text-black font-black print:text-black' : 'text-gray-300 print:text-transparent'}>
+                              {cell}
+                            </span>
+                          </div>
+                        );
+                      })
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="text-center text-xs text-gray-400">
+                   Answer Key for {title}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
