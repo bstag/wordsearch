@@ -56,6 +56,19 @@ A modern, print-optimized Word Search Generator built with Next.js, TypeScript, 
 
 4.  Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## 🌍 Deployment
+
+### GitHub Pages
+This repo is configured with a GitHub Actions workflow to automatically deploy to GitHub Pages.
+1.  Go to **Settings > Pages** in your repository.
+2.  Under **Build and deployment**, switch Source to **GitHub Actions**.
+3.  Push to `main` and the workflow will trigger.
+
+### Vercel
+1.  Import this repository into Vercel.
+2.  Vercel will automatically detect Next.js.
+3.  Deploy! (No special configuration needed).
+
 ## 📖 Usage Guide
 
 1.  **Configure**: Use the sidebar to set the Title, Grid Size (Width/Height), and Difficulty.
