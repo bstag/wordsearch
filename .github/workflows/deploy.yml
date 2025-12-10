@@ -78,6 +78,11 @@ jobs:
         env:
            # This environment variable is read by next.config.ts
            NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+      
+      # Add .nojekyll file to tell GitHub Pages not to process this as a Jekyll site
+      - name: Create .nojekyll
+        run: touch ./dist/.nojekyll
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
