@@ -40,8 +40,8 @@ A modern, print-optimized Word Search Generator built with Next.js, TypeScript, 
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/wordsearch-generator.git
-    cd wordsearch-generator
+    git clone https://github.com/bstag/wordsearch.git
+    cd wordsearch
     ```
 
 2.  Install dependencies:

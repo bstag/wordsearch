@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
-import { Printer, RefreshCw, Settings, Type } from 'lucide-react';
+import { Printer, RefreshCw, Settings, Type, Github } from 'lucide-react';
 
 export default function WordSearchBuilder() {
   // State synced with URL
@@ -258,6 +258,18 @@ export default function WordSearchBuilder() {
                 <Printer className="w-4 h-4 mr-2" />
                 Print Puzzle
               </button>
+
+              <div className="pt-4 border-t border-gray-200 mt-4">
+                <a 
+                  href="https://github.com/bstag/wordsearch" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  <Github className="w-4 h-4 mr-1.5" />
+                  View on GitHub
+                </a>
+              </div>
             </div>
           </div>
         </div>
