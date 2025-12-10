@@ -81,12 +81,12 @@ jobs:
       
       # Add .nojekyll file to tell GitHub Pages not to process this as a Jekyll site
       - name: Create .nojekyll
-        run: touch ./dist/.nojekyll
+        run: touch ./out/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./out
 
   # Deployment job
   deploy:
