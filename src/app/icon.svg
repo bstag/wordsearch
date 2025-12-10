@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="128" fill="#4f46e5"/>
+  <path d="M85 150 L145 362 L205 150 L255 150 L315 362 L375 150 L425 150 L345 420 L285 420 L230 220 L175 420 L115 420 L35 150 Z" fill="white" />
+  <path d="M280 150 C 280 150, 480 150, 480 230 C 480 290, 360 290, 360 290 C 360 290, 280 290, 280 350 C 280 410, 480 410, 480 410" stroke="white" stroke-width="0" fill="none" /> 
+  <!-- Actually, let's do a cleaner text based representation or simple paths for W S -->
+  <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="300" fill="white" letter-spacing="-20">WS</text>
+</svg>
