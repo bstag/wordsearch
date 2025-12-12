@@ -1,13 +1,17 @@
+import { z } from 'zod';
+
 export type Direction = 'horizontal' | 'vertical' | 'diagonal' | 'reverse';
 
-export interface GeneratorConfig {
-  width: number;
-  height: number;
-  words: string[];
-  allowBackwards: boolean;
-  allowDiagonals: boolean;
-  difficulty: number; // 0 to 10, controls density of distractors
-}
+export const GeneratorConfigSchema = z.object({
+  width: z.number().int().min(5).max(50),
+  height: z.number().int().min(5).max(50),
+  words: z.array(z.string().min(1).max(20)).min(1).max(100),
+  allowBackwards: z.boolean(),
+  allowDiagonals: z.boolean(),
+  difficulty: z.number().int().min(0).max(10)
+});
+
+export type GeneratorConfig = z.infer<typeof GeneratorConfigSchema>;
 
 export interface WordLocation {
   word: string;
@@ -31,7 +35,8 @@ const DIRECTIONS = {
 };
 
 export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
-  const { width, height, words, allowBackwards, allowDiagonals, difficulty } = config;
+  const validatedConfig = GeneratorConfigSchema.parse(config);
+  const { width, height, words, allowBackwards, allowDiagonals, difficulty } = validatedConfig;
 
   // Initialize empty grid
   const grid: string[][] = Array(height).fill(null).map(() => Array(width).fill(''));
@@ -123,10 +128,7 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   // Difficulty 0-10. Let's say difficulty * 0.5 * wordCount = number of distractors?
   // Or difficulty determines probability?
   // User said: "slider for Difficulty (which could control how many misspelled distractors are added)"
-  const numDistractors = Math.floor(words.length * (difficulty / 2)); // e.g., 10 words, diff 5 => 25 distractors? Maybe too many.
-  // Let's do: Diff 1 = 10% of words count, Diff 10 = 200% of words count?
-  // Let's try: numDistractors = Math.ceil(words.length * (difficulty / 5));
-  // If words=10, diff=5 => 10 distractors.
+  // Diff 1 = 10% of words count, Diff 10 = 200% of words count?
   
   const distractorCount = Math.ceil(words.length * (difficulty / 3));
 
