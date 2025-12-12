@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
 import { Printer, RefreshCw, Settings, Type, Github } from 'lucide-react';
@@ -55,24 +55,28 @@ export default function WordSearchBuilder() {
     return () => clearTimeout(timer);
   }, [width, height, wordsRaw, allowBackwards, allowDiagonals, difficulty, generate]);
 
-  // Check if a cell is part of a placed word
-  const isCellInSolution = (x: number, y: number) => {
-    if (!puzzle) return false;
-    return puzzle.placedWords.some(word => {
-      // Check if (x,y) lies on the line segment of the word
-      // This is a bit tricky with diagonal logic, let's iterate
-      // Simpler: Pre-calculate a solution grid or set
-      // For now, let's just do the math
-      
+  // Pre-calculate the solution set for faster lookup
+  const solutionSet = useMemo(() => {
+    if (!puzzle) return new Set<string>();
+
+    const set = new Set<string>();
+    puzzle.placedWords.forEach(word => {
       const dx = Math.sign(word.endX - word.startX);
       const dy = Math.sign(word.endY - word.startY);
       const length = Math.max(Math.abs(word.endX - word.startX), Math.abs(word.endY - word.startY)) + 1;
       
       for (let i = 0; i < length; i++) {
-        if (word.startX + i * dx === x && word.startY + i * dy === y) return true;
+        const x = word.startX + i * dx;
+        const y = word.startY + i * dy;
+        set.add(`${x},${y}`);
       }
-      return false;
     });
+    return set;
+  }, [puzzle]);
+
+  // Check if a cell is part of a placed word
+  const isCellInSolution = (x: number, y: number) => {
+    return solutionSet.has(`${x},${y}`);
   };
 
   // Calculate dynamic cell size for print
