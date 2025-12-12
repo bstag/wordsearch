@@ -128,8 +128,9 @@ export default function WordSearchBuilder() {
           <div className="space-y-6">
             {/* Title */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Puzzle Title</label>
+              <label htmlFor="title" className="text-sm font-medium text-gray-700">Puzzle Title</label>
               <input
+                id="title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -140,8 +141,9 @@ export default function WordSearchBuilder() {
             {/* Grid Size */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Width</label>
+                <label htmlFor="width" className="text-sm font-medium text-gray-700">Width</label>
                 <input
+                  id="width"
                   type="number"
                   min="5"
                   max="30"
@@ -151,8 +153,9 @@ export default function WordSearchBuilder() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Height</label>
+                <label htmlFor="height" className="text-sm font-medium text-gray-700">Height</label>
                 <input
+                  id="height"
                   type="number"
                   min="5"
                   max="30"
@@ -211,10 +214,11 @@ export default function WordSearchBuilder() {
             {/* Difficulty */}
             <div className="space-y-2">
               <div className="flex justify-between">
-                <label className="text-sm font-medium text-gray-700">Difficulty (Distractors)</label>
+                <label htmlFor="difficulty" className="text-sm font-medium text-gray-700">Difficulty (Distractors)</label>
                 <span className="text-xs text-gray-500">{difficulty}/10</span>
               </div>
               <input
+                id="difficulty"
                 type="range"
                 min="0"
                 max="10"
@@ -226,11 +230,12 @@ export default function WordSearchBuilder() {
 
             {/* Word List */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <label htmlFor="wordlist" className="text-sm font-medium text-gray-700 flex items-center gap-2">
                 <Type className="w-4 h-4" />
                 Word List
               </label>
               <textarea
+                id="wordlist"
                 value={wordsRaw}
                 onChange={(e) => setWordsRaw(e.target.value)}
                 rows={10}
