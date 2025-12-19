@@ -3,8 +3,9 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
-import { Printer, RefreshCw, Settings, Type, Github } from 'lucide-react';
 import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
+import { Printer, RefreshCw, Settings, Type, Github, AlertCircle } from 'lucide-react';
+import { z } from 'zod';
 
 export default function WordSearchBuilder() {
   // State synced with URL
@@ -21,23 +22,69 @@ export default function WordSearchBuilder() {
   // Internal state for the generated puzzle
   const [puzzle, setPuzzle] = useState<GeneratedPuzzle | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const generate = useCallback(() => {
     setIsGenerating(true);
+    setError(null);
     // Small timeout to allow UI to update if it was blocking
     setTimeout(() => {
-      const wordList = wordsRaw.split(/[\n,]+/).map(w => w.trim()).filter(w => w.length > 0);
-      const config = {
-        width,
-        height,
-        words: wordList,
-        allowBackwards,
-        allowDiagonals,
-        difficulty
-      };
-      const result = generatePuzzle(config);
-      setPuzzle(result);
-      setIsGenerating(false);
+      try {
+        const wordList = wordsRaw.split(/[\n,]+/).map(w => w.trim()).filter(w => w.length > 0);
+        const config = {
+          width,
+          height,
+          words: wordList,
+          allowBackwards,
+          allowDiagonals,
+          difficulty
+        };
+        const result = generatePuzzle(config);
+        setPuzzle(result);
+      } catch (err) {
+        console.error('Generation failed:', err);
+        if (err instanceof z.ZodError) {
+          const toFriendlyFieldName = (path: PropertyKey[]): string => {
+            if (!path || path.length === 0) {
+              return 'Configuration';
+            }
+            const [first] = path;
+            if (first === 'width') {
+              return 'Grid width';
+            }
+            if (first === 'height') {
+              return 'Grid height';
+            }
+            if (first === 'words') {
+              return 'Words list';
+            }
+            // Fallback to the raw path for any unexpected fields
+            return path.map(String).join('.');
+          };
+
+          const fieldMessages = err.issues.reduce<Record<string, string[]>>((acc, issue) => {
+            const fieldName = toFriendlyFieldName(issue.path);
+            if (!acc[fieldName]) {
+              acc[fieldName] = [];
+            }
+            acc[fieldName].push(issue.message);
+            return acc;
+          }, {});
+
+          const messages = Object.entries(fieldMessages)
+            .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
+            .join('; ');
+
+          setError(`Invalid configuration: ${messages}`);
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unexpected error occurred while generating the puzzle.');
+        }
+        setPuzzle(null);
+      } finally {
+        setIsGenerating(false);
+      }
     }, 10);
   }, [width, height, wordsRaw, allowBackwards, allowDiagonals, difficulty]);
 
@@ -283,6 +330,26 @@ export default function WordSearchBuilder() {
         <div className="flex-1 p-8 overflow-auto print:p-0 print:overflow-visible">
           <div className="max-w-4xl mx-auto print:max-w-none print:w-full">
             
+            {/* Error Message */}
+            {error && (
+              <div
+                className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-md print:hidden"
+                role="alert"
+              >
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <AlertCircle className="h-5 w-5 text-red-400" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">Generation Failed</h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      <p>{error}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Puzzle Header */}
             <div className="mb-8 text-center" style={{ marginBottom: 'var(--print-title-margin)' }}>
               <h1 
@@ -312,7 +379,7 @@ export default function WordSearchBuilder() {
               <h2 className="text-lg font-semibold mb-4 border-b border-gray-300 pb-2 print:text-black">Word Bank</h2>
               
               {isOverflowing && (
-                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-sm print:hidden flex items-start">
+                <div role="alert" className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-sm print:hidden flex items-start">
                   <span className="font-bold mr-1">Warning:</span> 
                   This puzzle may be too tall to fit on a single printed page. Try reducing the grid height or the number of words.
                 </div>
@@ -331,7 +398,7 @@ export default function WordSearchBuilder() {
                 ))}
               </ul>
               {puzzle?.placedWords.length !== wordsRaw.split(/[\n,]+/).filter(w => w.trim().length > 0).length && (
-                 <div className="mt-4 text-red-500 text-sm print:hidden">
+                 <div role="alert" className="mt-4 text-red-500 text-sm print:hidden">
                    Warning: Some words could not be placed due to space constraints. Try increasing the grid size.
                  </div>
               )}
