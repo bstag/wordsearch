@@ -306,7 +306,10 @@ export default function WordSearchBuilder() {
             
             {/* Error Message */}
             {error && (
-              <div className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-md print:hidden">
+              <div
+                className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-md print:hidden"
+                role="alert"
+              >
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <AlertCircle className="h-5 w-5 text-red-400" />
