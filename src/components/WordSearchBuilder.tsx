@@ -43,7 +43,36 @@ export default function WordSearchBuilder() {
       } catch (err) {
         console.error('Generation failed:', err);
         if (err instanceof z.ZodError) {
-          const messages = err.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+          const toFriendlyFieldName = (path: (string | number)[]): string => {
+            if (!path || path.length === 0) {
+              return 'Configuration';
+            }
+            const [first] = path;
+            if (first === 'width') {
+              return 'Grid width';
+            }
+            if (first === 'height') {
+              return 'Grid height';
+            }
+            if (first === 'words') {
+              return 'Words list';
+            }
+            // Fallback to the raw path for any unexpected fields
+            return path.map(String).join('.');
+          };
+
+          const fieldMessages = err.issues.reduce<Record<string, string[]>>((acc, issue) => {
+            const fieldName = toFriendlyFieldName(issue.path);
+            if (!acc[fieldName]) {
+              acc[fieldName] = [];
+            }
+            acc[fieldName].push(issue.message);
+            return acc;
+          }, {});
+
+          const messages = Object.entries(fieldMessages)
+            .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
+            .join('; ');
           setError(`Invalid configuration: ${messages}`);
         } else if (err instanceof Error) {
           setError(err.message);
