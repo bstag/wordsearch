@@ -332,7 +332,7 @@ export default function WordSearchBuilder() {
               <h2 className="text-lg font-semibold mb-4 border-b border-gray-300 pb-2 print:text-black">Word Bank</h2>
               
               {isOverflowing && (
-                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-sm print:hidden flex items-start">
+                <div role="alert" className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-sm print:hidden flex items-start">
                   <span className="font-bold mr-1">Warning:</span> 
                   This puzzle may be too tall to fit on a single printed page. Try reducing the grid height or the number of words.
                 </div>
@@ -351,7 +351,7 @@ export default function WordSearchBuilder() {
                 ))}
               </ul>
               {puzzle?.placedWords.length !== wordsRaw.split(/[\n,]+/).filter(w => w.trim().length > 0).length && (
-                 <div className="mt-4 text-red-500 text-sm print:hidden">
+                 <div role="alert" className="mt-4 text-red-500 text-sm print:hidden">
                    Warning: Some words could not be placed due to space constraints. Try increasing the grid size.
                  </div>
               )}
