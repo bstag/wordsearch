@@ -43,7 +43,7 @@ export default function WordSearchBuilder() {
       } catch (err) {
         console.error('Generation failed:', err);
         if (err instanceof z.ZodError) {
-          const toFriendlyFieldName = (path: (string | number)[]): string => {
+          const toFriendlyFieldName = (path: PropertyKey[]): string => {
             if (!path || path.length === 0) {
               return 'Configuration';
             }
@@ -73,6 +73,7 @@ export default function WordSearchBuilder() {
           const messages = Object.entries(fieldMessages)
             .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
             .join('; ');
+
           setError(`Invalid configuration: ${messages}`);
         } else if (err instanceof Error) {
           setError(err.message);
