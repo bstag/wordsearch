@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
+import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
 import { Printer, RefreshCw, Settings, Type, Github, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
 
@@ -120,11 +121,6 @@ export default function WordSearchBuilder() {
     });
     return set;
   }, [puzzle]);
-
-  // Check if a cell is part of a placed word
-  const isCellInSolution = (x: number, y: number) => {
-    return solutionSet.has(`${x},${y}`);
-  };
 
   // Calculate dynamic cell size for print
   // Max printable width ~180mm (approx 700px), max height ~240mm (approx 900px) minus headers
@@ -368,29 +364,13 @@ export default function WordSearchBuilder() {
             {/* Grid */}
             {puzzle && (
               <div className="flex justify-center mb-10" style={{ marginBottom: 'var(--print-title-margin)' }}>
-                <div 
-                  className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
-                  style={{
-                    gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
-                    width: 'fit-content',
-                  }}
-                >
-                  {puzzle.grid.map((row, y) => (
-                    row.map((cell, x) => (
-                      <div
-                        key={`${x}-${y}`}
-                        className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-lg md:text-xl font-bold uppercase ${showGridLines ? 'border border-gray-300 print:border-gray-800' : ''} print:text-black`}
-                        style={{
-                          width: 'var(--print-cell-size)',
-                          height: 'var(--print-cell-size)',
-                          fontSize: 'var(--print-font-size)',
-                        }}
-                      >
-                        {cell}
-                      </div>
-                    ))
-                  ))}
-                </div>
+                <PuzzleGrid
+                  grid={puzzle.grid}
+                  width={width}
+                  showGridLines={showGridLines}
+                  printCellSize={printCellSize}
+                  printFontSize={printFontSize}
+                />
               </div>
             )}
 
@@ -440,34 +420,14 @@ export default function WordSearchBuilder() {
                 </div>
 
                 <div className="flex justify-center mb-10">
-                  <div 
-                    className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
-                    style={{
-                      gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
-                      width: 'fit-content',
-                    }}
-                  >
-                    {puzzle.grid.map((row, y) => (
-                      row.map((cell, x) => {
-                        const isSolution = isCellInSolution(x, y);
-                        return (
-                          <div
-                            key={`${x}-${y}`}
-                            className={`w-9 h-9 flex items-center justify-center text-xl font-bold uppercase ${showGridLines ? 'border border-gray-800' : ''} text-black ${isSolution ? 'print:bg-transparent bg-gray-300' : ''}`}
-                            style={{
-                              width: 'var(--print-cell-size)',
-                              height: 'var(--print-cell-size)',
-                              fontSize: 'var(--print-font-size)',
-                            }}
-                          >
-                            <span className={isSolution ? 'text-black font-black print:text-black' : 'text-gray-300 print:text-transparent'}>
-                              {cell}
-                            </span>
-                          </div>
-                        );
-                      })
-                    ))}
-                  </div>
+                  <AnswerKeyGrid
+                    grid={puzzle.grid}
+                    width={width}
+                    showGridLines={showGridLines}
+                    printCellSize={printCellSize}
+                    printFontSize={printFontSize}
+                    solutionSet={solutionSet}
+                  />
                 </div>
                 
                 <div className="text-center text-xs text-gray-400">
