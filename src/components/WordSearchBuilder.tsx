@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
 import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
-import { Printer, RefreshCw, Settings, Type, Github, AlertCircle } from 'lucide-react';
+import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check } from 'lucide-react';
 import { z } from 'zod';
 
 export default function WordSearchBuilder() {
@@ -23,6 +23,17 @@ export default function WordSearchBuilder() {
   const [puzzle, setPuzzle] = useState<GeneratedPuzzle | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy URL:', err);
+    }
+  };
 
   const generate = useCallback(() => {
     setIsGenerating(true);
@@ -309,6 +320,17 @@ export default function WordSearchBuilder() {
               >
                 <Printer className="w-4 h-4 mr-2" />
                 Print Puzzle
+              </button>
+              <button
+                onClick={handleShare}
+                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                {isCopied ? (
+                  <Check className="w-4 h-4 mr-2 text-green-600" />
+                ) : (
+                  <Share2 className="w-4 h-4 mr-2" />
+                )}
+                {isCopied ? 'Copied Link!' : 'Share Configuration'}
               </button>
 
               <div className="pt-4 border-t border-gray-200 mt-4">
