@@ -62,20 +62,33 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   }
 
   // Helper to place a word
-  const placeWord = (word: string, isDistractor: boolean): boolean => {
+  // Assumes word is already upper-case and clean (A-Z only)
+  const placeWord = (cleanWord: string, isDistractor: boolean): boolean => {
     const maxAttempts = 100;
-    const cleanWord = word.toUpperCase().replace(/[^A-Z]/g, '');
+    const wordLen = cleanWord.length;
     
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const dir = allDirections[Math.floor(Math.random() * allDirections.length)];
-      const startX = Math.floor(Math.random() * width);
-      const startY = Math.floor(Math.random() * height);
 
-      // Check bounds
-      const endX = startX + (cleanWord.length - 1) * dir.x;
-      const endY = startY + (cleanWord.length - 1) * dir.y;
+      // Calculate valid start ranges based on direction and word length to avoid out-of-bounds checks
+      // x + (len-1)*dx must be in [0, width)
+      // if dx = 1: x + len - 1 < width => x < width - len + 1
+      // if dx = -1: x - (len - 1) >= 0 => x >= len - 1
+      // if dx = 0: x in [0, width)
 
-      if (endX < 0 || endX >= width || endY < 0 || endY >= height) continue;
+      let minX = 0, maxX = width;
+      if (dir.x === 1) maxX = width - wordLen + 1;
+      else if (dir.x === -1) minX = wordLen - 1;
+
+      let minY = 0, maxY = height;
+      if (dir.y === 1) maxY = height - wordLen + 1;
+      else if (dir.y === -1) minY = wordLen - 1;
+
+      // If word is too long for the grid in this direction
+      if (maxX <= minX || maxY <= minY) continue;
+
+      const startX = Math.floor(Math.random() * (maxX - minX)) + minX;
+      const startY = Math.floor(Math.random() * (maxY - minY)) + minY;
 
       // Check collisions
       let valid = true;
@@ -101,8 +114,8 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
           word: cleanWord,
           startX,
           startY,
-          endX,
-          endY
+          endX: startX + (wordLen - 1) * dir.x,
+          endY: startY + (wordLen - 1) * dir.y
         };
 
         if (isDistractor) {
@@ -121,7 +134,8 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
 
   // 2. Place real words
   sortedWords.forEach(word => {
-    placeWord(word, false);
+    const clean = word.toUpperCase().replace(/[^A-Z]/g, '');
+    placeWord(clean, false);
   });
 
   // 3. Generate and place distractors
