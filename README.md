@@ -13,7 +13,7 @@ A modern, print-optimized Word Search Generator built with Next.js, TypeScript, 
     -   Horizontal & Vertical
     -   Diagonals
     -   Backwards (Reverse)
--   **Difficulty Slider (Misspelled Distractors)**: Adds "fake" words (e.g., "TIGEK" instead of "TIGER") to increase challenge.
+-   **Difficulty Slider (Misspelled Distractors)**: Adds "fake" words (e.g., "TIGEK" instead of "TIGER") to increase challenge based on difficulty level.
 -   **Print-Optimized**:
     -   **Ink-Saving Mode**: No background colors or heavy borders.
     -   **Auto-Scaling**: Fonts and grids automatically resize to fit A4/Letter pages.
@@ -24,9 +24,9 @@ A modern, print-optimized Word Search Generator built with Next.js, TypeScript, 
 
 ## 🛠️ Tech Stack
 
--   **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+-   **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
 -   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+-   **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
 -   **State Management**: [nuqs](https://nuqs.47ng.com/) (URL-based state)
 -   **Icons**: [Lucide React](https://lucide.dev/)
 
@@ -34,7 +34,7 @@ A modern, print-optimized Word Search Generator built with Next.js, TypeScript, 
 
 ### Prerequisites
 
--   Node.js 18+ installed.
+-   Node.js 18.17+ installed.
 
 ### Installation
 
@@ -56,6 +56,20 @@ A modern, print-optimized Word Search Generator built with Next.js, TypeScript, 
 
 4.  Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Local Production Preview
+
+Since this project uses `output: 'export'` for static site generation, `npm start` will not work as it expects a server-side runtime. To preview the production build locally:
+
+1.  Build the project:
+    ```bash
+    npm run build
+    ```
+
+2.  Serve the `out` directory:
+    ```bash
+    npx serve@latest out
+    ```
+
 ## 🌍 Deployment
 
 ### GitHub Pages
@@ -67,7 +81,7 @@ This repo is configured with a GitHub Actions workflow to automatically deploy t
 ### Vercel
 1.  Import this repository into Vercel.
 2.  Vercel will automatically detect Next.js.
-3.  Deploy! (No special configuration needed).
+3.  Deploy! (Vercel automatically handles the static output).
 
 ## 📖 Usage Guide
 
