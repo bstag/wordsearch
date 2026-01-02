@@ -29,8 +29,10 @@ export default function RootLayout({
         {/* Security Enhancement: Content Security Policy */}
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';"
+          content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';"
         />
+        {/* Security Enhancement: Referrer Policy */}
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
