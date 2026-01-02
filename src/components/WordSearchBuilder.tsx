@@ -225,8 +225,8 @@ export default function WordSearchBuilder() {
             </div>
 
             {/* Options */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-700">Directions</label>
+            <fieldset className="space-y-3">
+              <legend className="text-sm font-medium text-gray-700 mb-2">Directions</legend>
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -267,7 +267,7 @@ export default function WordSearchBuilder() {
                 />
                 <label htmlFor="answerKey" className="text-sm text-gray-600">Include Answer Key</label>
               </div>
-            </div>
+            </fieldset>
 
             {/* Difficulty */}
             <div className="space-y-2">
@@ -283,6 +283,8 @@ export default function WordSearchBuilder() {
                 value={difficulty}
                 onChange={(e) => setDifficulty(parseInt(e.target.value))}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                aria-label="Difficulty level (number of distractors)"
+                aria-valuetext={`${difficulty} out of 10`}
               />
             </div>
 
@@ -309,10 +311,11 @@ export default function WordSearchBuilder() {
             <div className="pt-4 space-y-3">
               <button
                 onClick={generate}
-                className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                disabled={isGenerating}
+                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isGenerating ? 'opacity-75 cursor-not-allowed' : ''}`}
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
-                Regenerate Puzzle
+                {isGenerating ? 'Generating...' : 'Regenerate Puzzle'}
               </button>
               <button
                 onClick={() => window.print()}
