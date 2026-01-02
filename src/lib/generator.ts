@@ -34,6 +34,8 @@ const DIRECTIONS = {
   diagonalUp: { x: 1, y: -1 },
 };
 
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   const validatedConfig = GeneratorConfigSchema.parse(config);
   const { width, height, words, allowBackwards, allowDiagonals, difficulty } = validatedConfig;
@@ -50,11 +52,6 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   }
   
   // If backwards is allowed, we can flip any of the base directions
-  // Actually, standard implementation is: 
-  // R: (1,0), D: (0,1), DR: (1,1), UR: (1,-1)
-  // If backwards:
-  // L: (-1,0), U: (0,-1), UL: (-1,-1), DL: (-1,1)
-  
   let allDirections = [...directions];
   if (allowBackwards) {
     const backwardDirections = directions.map(d => ({ x: -d.x, y: -d.y }));
@@ -67,15 +64,9 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
     const maxAttempts = 100;
     const wordLen = cleanWord.length;
     
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const dir = allDirections[Math.floor(Math.random() * allDirections.length)];
-
-      // Calculate valid start ranges based on direction and word length to avoid out-of-bounds checks
-      // x + (len-1)*dx must be in [0, width)
-      // if dx = 1: x + len - 1 < width => x < width - len + 1
-      // if dx = -1: x - (len - 1) >= 0 => x >= len - 1
-      // if dx = 0: x in [0, width)
-
+    // Pre-calculate valid directions and their bounds to avoid redundant checks inside the retry loop
+    const validConfigs = [];
+    for (const dir of allDirections) {
       let minX = 0, maxX = width;
       if (dir.x === 1) maxX = width - wordLen + 1;
       else if (dir.x === -1) minX = wordLen - 1;
@@ -84,15 +75,25 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
       if (dir.y === 1) maxY = height - wordLen + 1;
       else if (dir.y === -1) minY = wordLen - 1;
 
-      // If word is too long for the grid in this direction
-      if (maxX <= minX || maxY <= minY) continue;
+      // Only add direction if the word fits within grid dimensions
+      if (maxX > minX && maxY > minY) {
+        validConfigs.push({ dir, minX, maxX, minY, maxY });
+      }
+    }
+
+    if (validConfigs.length === 0) return false;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      // Pick a random valid direction configuration
+      const config = validConfigs[Math.floor(Math.random() * validConfigs.length)];
+      const { dir, minX, maxX, minY, maxY } = config;
 
       const startX = Math.floor(Math.random() * (maxX - minX)) + minX;
       const startY = Math.floor(Math.random() * (maxY - minY)) + minY;
 
       // Check collisions
       let valid = true;
-      for (let i = 0; i < cleanWord.length; i++) {
+      for (let i = 0; i < wordLen; i++) {
         const x = startX + i * dir.x;
         const y = startY + i * dir.y;
         const cell = grid[y][x];
@@ -104,7 +105,7 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
 
       if (valid) {
         // Place it
-        for (let i = 0; i < cleanWord.length; i++) {
+        for (let i = 0; i < wordLen; i++) {
           const x = startX + i * dir.x;
           const y = startY + i * dir.y;
           grid[y][x] = cleanWord[i];
@@ -139,11 +140,6 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   });
 
   // 3. Generate and place distractors
-  // Difficulty 0-10. Let's say difficulty * 0.5 * wordCount = number of distractors?
-  // Or difficulty determines probability?
-  // User said: "slider for Difficulty (which could control how many misspelled distractors are added)"
-  // Diff 1 = 10% of words count, Diff 10 = 200% of words count?
-  
   const distractorCount = Math.ceil(words.length * (difficulty / 3));
 
   for (let i = 0; i < distractorCount; i++) {
@@ -155,10 +151,10 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
     const originalChar = clean[charIndex];
     
     // Pick a random char that is NOT the original char
-    let newChar = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-    while (newChar === originalChar) {
-      newChar = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-    }
+    const originalCharCode = originalChar.charCodeAt(0) - 65;
+    const offset = Math.floor(Math.random() * 25) + 1; // 1 to 25
+    const newCharCode = (originalCharCode + offset) % 26;
+    const newChar = ALPHABET[newCharCode];
     
     const distractor = clean.substring(0, charIndex) + newChar + clean.substring(charIndex + 1);
     placeWord(distractor, true);
@@ -168,7 +164,7 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       if (grid[y][x] === '') {
-        grid[y][x] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        grid[y][x] = ALPHABET[Math.floor(Math.random() * 26)];
       }
     }
   }
