@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
 import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
-import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check } from 'lucide-react';
+import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 
 export default function WordSearchBuilder() {
@@ -24,6 +24,7 @@ export default function WordSearchBuilder() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
 
   const handleShare = async () => {
     try {
@@ -384,6 +385,18 @@ export default function WordSearchBuilder() {
                 {title}
               </h1>
 
+              <div className="print:hidden flex justify-center mt-2">
+                <button
+                  onClick={() => setShowSolution(!showSolution)}
+                  className="flex items-center text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+                  aria-label={showSolution ? "Hide solution in preview" : "Show solution in preview"}
+                  aria-pressed={showSolution}
+                >
+                  {showSolution ? <EyeOff className="w-4 h-4 mr-1.5" /> : <Eye className="w-4 h-4 mr-1.5" />}
+                  {showSolution ? "Hide Solution" : "Show Solution"}
+                </button>
+              </div>
+
             </div>
 
             {/* Grid */}
@@ -395,6 +408,8 @@ export default function WordSearchBuilder() {
                   showGridLines={showGridLines}
                   printCellSize={printCellSize}
                   printFontSize={printFontSize}
+                  solutionSet={solutionSet}
+                  highlightSolution={showSolution}
                 />
               </div>
             )}

@@ -7,9 +7,11 @@ interface PuzzleGridProps {
   showGridLines: boolean;
   printCellSize: number;
   printFontSize: number;
+  solutionSet?: Set<string>;
+  highlightSolution?: boolean;
 }
 
-const PuzzleGrid = React.memo(({ grid, width, showGridLines, printCellSize, printFontSize }: PuzzleGridProps) => {
+const PuzzleGrid = React.memo(({ grid, width, showGridLines, printCellSize, printFontSize, solutionSet, highlightSolution }: PuzzleGridProps) => {
   return (
     <div
       className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
@@ -19,19 +21,22 @@ const PuzzleGrid = React.memo(({ grid, width, showGridLines, printCellSize, prin
       }}
     >
       {grid.map((row, y) => (
-        row.map((cell, x) => (
-          <div
-            key={`${x}-${y}`}
-            className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-lg md:text-xl font-bold uppercase ${showGridLines ? 'border border-gray-300 print:border-gray-800' : ''} print:text-black`}
-            style={{
-              width: `${printCellSize}px`,
-              height: `${printCellSize}px`,
-              fontSize: `${printFontSize}px`,
-            }}
-          >
-            {cell}
-          </div>
-        ))
+        row.map((cell, x) => {
+          const isHighlighted = highlightSolution && solutionSet?.has(`${x},${y}`);
+          return (
+            <div
+              key={`${x}-${y}`}
+              className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-lg md:text-xl font-bold uppercase ${showGridLines ? 'border border-gray-300 print:border-gray-800' : ''} ${isHighlighted ? 'bg-yellow-100 text-indigo-700 print:bg-transparent print:text-black' : 'print:text-black'}`}
+              style={{
+                width: `${printCellSize}px`,
+                height: `${printCellSize}px`,
+                fontSize: `${printFontSize}px`,
+              }}
+            >
+              {cell}
+            </div>
+          );
+        })
       ))}
     </div>
   );
