@@ -3,18 +3,20 @@ import { GeneratedPuzzle } from '@/lib/generator';
 
 interface PuzzleGridProps {
   grid: GeneratedPuzzle['grid'];
-  width: number;
   showGridLines: boolean;
   printCellSize: number;
   printFontSize: number;
 }
 
-const PuzzleGrid = React.memo(({ grid, width, showGridLines, printCellSize, printFontSize }: PuzzleGridProps) => {
+const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize }: PuzzleGridProps) => {
+  // ⚡ Performance: Derive width from grid to prevent re-renders when config changes but grid hasn't regenerated yet.
+  const gridWidth = grid[0]?.length || 0;
+
   return (
     <div
       className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
       style={{
-        gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
+        gridTemplateColumns: `repeat(${gridWidth}, minmax(0, 1fr))`,
         width: 'fit-content',
       }}
     >
@@ -41,14 +43,16 @@ PuzzleGrid.displayName = 'PuzzleGrid';
 
 interface AnswerKeyGridProps {
   grid: GeneratedPuzzle['grid'];
-  width: number;
   showGridLines: boolean;
   printCellSize: number;
   printFontSize: number;
   solutionSet: Set<string>;
 }
 
-const AnswerKeyGrid = React.memo(({ grid, width, showGridLines, printCellSize, printFontSize, solutionSet }: AnswerKeyGridProps) => {
+const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionSet }: AnswerKeyGridProps) => {
+  // ⚡ Performance: Derive width from grid to prevent re-renders when config changes but grid hasn't regenerated yet.
+  const gridWidth = grid[0]?.length || 0;
+
   const isCellInSolution = (x: number, y: number) => {
     return solutionSet.has(`${x},${y}`);
   };
@@ -57,7 +61,7 @@ const AnswerKeyGrid = React.memo(({ grid, width, showGridLines, printCellSize, p
     <div
       className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
       style={{
-        gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
+        gridTemplateColumns: `repeat(${gridWidth}, minmax(0, 1fr))`,
         width: 'fit-content',
       }}
     >
