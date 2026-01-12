@@ -139,14 +139,21 @@ export default function WordSearchBuilder() {
   // Let's use 700px width and 600px height for the grid part to be safe
   const maxPrintWidth = 700;
   const maxPrintHeight = 600;
-  const printCellSize = Math.floor(Math.min(maxPrintWidth / width, maxPrintHeight / height));
+
+  // ⚡ Performance: Use active puzzle dimensions if available, otherwise fallback to config.
+  // This prevents the print size from jumping around (and triggering grid re-renders)
+  // while the user is typing in the width/height inputs, until the new puzzle is actually generated.
+  const activeWidth = puzzle ? puzzle.grid[0].length : width;
+  const activeHeight = puzzle ? puzzle.grid.length : height;
+
+  const printCellSize = Math.floor(Math.min(maxPrintWidth / activeWidth, maxPrintHeight / activeHeight));
   const printFontSize = Math.floor(printCellSize * 0.65);
 
   // Calculate dynamic word bank size
   const wordCount = puzzle?.placedWords.length || 0;
   const wordBankCols = 4;
   const wordBankRows = Math.ceil(wordCount / wordBankCols);
-  const gridHeightPx = height * printCellSize;
+  const gridHeightPx = activeHeight * printCellSize;
   // A4 printable height ~950px - grid - headers(~150px)
   const availableForWords = 950 - gridHeightPx - 150;
   
@@ -404,7 +411,6 @@ export default function WordSearchBuilder() {
               <div className="flex justify-center mb-10" style={{ marginBottom: 'var(--print-title-margin)' }}>
                 <PuzzleGrid
                   grid={puzzle.grid}
-                  width={width}
                   showGridLines={showGridLines}
                   printCellSize={printCellSize}
                   printFontSize={printFontSize}
@@ -462,7 +468,6 @@ export default function WordSearchBuilder() {
                 <div className="flex justify-center mb-10">
                   <AnswerKeyGrid
                     grid={puzzle.grid}
-                    width={width}
                     showGridLines={showGridLines}
                     printCellSize={printCellSize}
                     printFontSize={printFontSize}
