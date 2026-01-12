@@ -10,7 +10,7 @@ interface PuzzleGridProps {
   highlightSolution?: boolean;
 }
 
-const PuzzleGrid = React.memo(({ grid, width, showGridLines, printCellSize, printFontSize, solutionSet, highlightSolution }: PuzzleGridProps) => {
+const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionSet, highlightSolution }: PuzzleGridProps) => {
   // ⚡ Performance: Derive width from grid to prevent re-renders when config changes but grid hasn't regenerated yet.
   const gridWidth = grid[0]?.length || 0;
 
