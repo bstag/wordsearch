@@ -6,9 +6,11 @@ interface PuzzleGridProps {
   showGridLines: boolean;
   printCellSize: number;
   printFontSize: number;
+  solutionSet?: Set<string>;
+  highlightSolution?: boolean;
 }
 
-const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize }: PuzzleGridProps) => {
+const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionSet, highlightSolution }: PuzzleGridProps) => {
   // ⚡ Performance: Derive width from grid to prevent re-renders when config changes but grid hasn't regenerated yet.
   const gridWidth = grid[0]?.length || 0;
 
@@ -21,19 +23,22 @@ const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSi
       }}
     >
       {grid.map((row, y) => (
-        row.map((cell, x) => (
-          <div
-            key={`${x}-${y}`}
-            className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-lg md:text-xl font-bold uppercase ${showGridLines ? 'border border-gray-300 print:border-gray-800' : ''} print:text-black`}
-            style={{
-              width: `${printCellSize}px`,
-              height: `${printCellSize}px`,
-              fontSize: `${printFontSize}px`,
-            }}
-          >
-            {cell}
-          </div>
-        ))
+        row.map((cell, x) => {
+          const isHighlighted = highlightSolution && solutionSet?.has(`${x},${y}`);
+          return (
+            <div
+              key={`${x}-${y}`}
+              className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-lg md:text-xl font-bold uppercase ${showGridLines ? 'border border-gray-300 print:border-gray-800' : ''} ${isHighlighted ? 'bg-yellow-100 text-indigo-700 print:bg-transparent print:text-black' : 'print:text-black'}`}
+              style={{
+                width: `${printCellSize}px`,
+                height: `${printCellSize}px`,
+                fontSize: `${printFontSize}px`,
+              }}
+            >
+              {cell}
+            </div>
+          );
+        })
       ))}
     </div>
   );
