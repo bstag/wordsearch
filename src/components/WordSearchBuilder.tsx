@@ -3,9 +3,10 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
+import { getRandomDefaultWords } from '@/lib/wordPool';
 import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
 import { PlayablePuzzleGrid } from './PlayablePuzzleGrid';
-import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play } from 'lucide-react';
+import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play, Dice5, ArrowLeft } from 'lucide-react';
 import { z } from 'zod';
 
 export default function WordSearchBuilder() {
@@ -13,13 +14,21 @@ export default function WordSearchBuilder() {
   const [title, setTitle] = useQueryState('title', parseAsString.withDefault('My Word Search'));
   const [width, setWidth] = useQueryState('width', parseAsInteger.withDefault(15));
   const [height, setHeight] = useQueryState('height', parseAsInteger.withDefault(15));
-  const [wordsRaw, setWordsRaw] = useQueryState('words', parseAsString.withDefault('LION,TIGER,BEAR'));
+  // We use a specific placeholder to detect if we should randomize on first load
+  const [wordsRaw, setWordsRaw] = useQueryState('words', parseAsString.withDefault('')); 
   const [allowBackwards, setAllowBackwards] = useQueryState('backwards', parseAsBoolean.withDefault(true));
   const [allowDiagonals, setAllowDiagonals] = useQueryState('diagonals', parseAsBoolean.withDefault(true));
   const [showGridLines, setShowGridLines] = useQueryState('gridLines', parseAsBoolean.withDefault(false));
   const [showAnswerKey, setShowAnswerKey] = useQueryState('answerKey', parseAsBoolean.withDefault(true));
   const [difficulty, setDifficulty] = useQueryState('difficulty', parseAsInteger.withDefault(5));
   const [runMode, setRunMode] = useQueryState('run', parseAsBoolean.withDefault(false));
+
+  // Initialize random words if empty
+  useEffect(() => {
+    if (!wordsRaw || wordsRaw === 'LION,TIGER,BEAR') {
+      setWordsRaw(getRandomDefaultWords());
+    }
+  }, []); // Only run on mount (or when wordsRaw is initially checked, but we want to avoid loops)
 
   // Internal state for the generated puzzle
   const [puzzle, setPuzzle] = useState<GeneratedPuzzle | null>(null);
@@ -37,6 +46,10 @@ export default function WordSearchBuilder() {
       .map(w => w.trim())
       .filter(w => w.length > maxLen);
   }, [wordsRaw, width, height]);
+
+  const handleRandomizeWords = () => {
+    setWordsRaw(getRandomDefaultWords());
+  };
 
   const handleShare = async () => {
     try {
@@ -61,12 +74,18 @@ export default function WordSearchBuilder() {
   };
 
   const generate = useCallback(() => {
+    // If no words, don't try to generate (avoids ZodError)
+    const wordList = wordsRaw.split(/[\n,]+/).map(w => w.trim()).filter(w => w.length > 0);
+    if (wordList.length === 0) {
+      setPuzzle(null);
+      return;
+    }
+
     setIsGenerating(true);
     setError(null);
     // Small timeout to allow UI to update if it was blocking
     setTimeout(() => {
       try {
-        const wordList = wordsRaw.split(/[\n,]+/).map(w => w.trim()).filter(w => w.length > 0);
         const config = {
           width,
           height,
@@ -124,12 +143,6 @@ export default function WordSearchBuilder() {
       }
     }, 10);
   }, [width, height, wordsRaw, allowBackwards, allowDiagonals, difficulty]);
-
-  // Initial generation
-  useEffect(() => {
-    generate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount, then user triggers or we can auto-trigger on changes with debounce
 
   // Debounced auto-generation on config changes could be nice, but let's stick to manual or effect-based
   // Let's auto-generate when config changes
@@ -325,10 +338,20 @@ export default function WordSearchBuilder() {
 
             {/* Word List */}
             <div className="space-y-2">
-              <label htmlFor="wordlist" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Type className="w-4 h-4" />
-                Word List
-              </label>
+              <div className="flex justify-between items-center">
+                <label htmlFor="wordlist" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Type className="w-4 h-4" />
+                  Word List
+                </label>
+                <button
+                  onClick={handleRandomizeWords}
+                  className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-800 transition-colors"
+                  title="Generate random words"
+                >
+                  <Dice5 className="w-3 h-3" />
+                  Randomize
+                </button>
+              </div>
               <textarea
                 id="wordlist"
                 maxLength={2500}
@@ -428,6 +451,17 @@ export default function WordSearchBuilder() {
 
             {/* Puzzle Header */}
             <div className="mb-8 text-center" style={{ marginBottom: 'var(--print-title-margin)' }}>
+              {runMode && (
+                <div className="mb-4 flex justify-center print:hidden">
+                  <button
+                    onClick={() => setRunMode(false)}
+                    className="flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1.5" />
+                    Back to Config
+                  </button>
+                </div>
+              )}
               <h1 
                 className="text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider"
                 style={{ fontSize: 'var(--print-title-size)' }}

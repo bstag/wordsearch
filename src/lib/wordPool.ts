@@ -1,0 +1,44 @@
+export const WORD_POOL = [
+  // Animals
+  "LION", "TIGER", "BEAR", "ELEPHANT", "GIRAFFE", "ZEBRA", "MONKEY", "PANDA", "KOALA", "KANGAROO",
+  "PENGUIN", "DOLPHIN", "WHALE", "SHARK", "OCTOPUS", "EAGLE", "HAWK", "OWL", "PARROT", "FLAMINGO",
+  "RABBIT", "HAMSTER", "TURTLE", "FROG", "SNAKE", "LIZARD", "CROCODILE", "HIPPO", "RHINO", "WOLF",
+  "FOX", "DEER", "MOOSE", "BUFFALO", "HORSE", "COW", "PIG", "SHEEP", "GOAT", "CHICKEN",
+  
+  // Fruits & Veggies
+  "APPLE", "BANANA", "ORANGE", "GRAPE", "LEMON", "LIME", "PEACH", "PEAR", "PLUM", "CHERRY",
+  "STRAWBERRY", "BLUEBERRY", "RASPBERRY", "MANGO", "PINEAPPLE", "KIWI", "MELON", "PAPAYA", "FIG", "DATE",
+  "CARROT", "POTATO", "TOMATO", "ONION", "PEPPER", "CORN", "PEAS", "BEANS", "BROCCOLI", "SPINACH",
+  "LETTUCE", "CUCUMBER", "ZUCCHINI", "PUMPKIN", "RADISH", "CELERY", "GARLIC", "GINGER", "MUSHROOM", "OLIVE",
+  
+  // Colors
+  "RED", "ORANGE", "YELLOW", "GREEN", "BLUE", "PURPLE", "PINK", "BROWN", "BLACK", "WHITE",
+  "GRAY", "SILVER", "GOLD", "TEAL", "TURQUOISE", "INDIGO", "VIOLET", "MAGENTA", "CYAN", "BEIGE",
+  "MAROON", "NAVY", "OLIVE", "CORAL", "SALMON", "LAVENDER", "CRIMSON", "AZURE", "IVORY", "AMBER",
+  
+  // Space
+  "SUN", "MOON", "STAR", "PLANET", "MERCURY", "VENUS", "EARTH", "MARS", "JUPITER", "SATURN",
+  "URANUS", "NEPTUNE", "PLUTO", "COMET", "ASTEROID", "METEOR", "GALAXY", "UNIVERSE", "NEBULA", "ORBIT",
+  "ROCKET", "ASTRONAUT", "TELESCOPE", "SATELLITE", "ECLIPSE", "GRAVITY", "CONSTELATION", "SPACE", "SKY", "ALIEN",
+  
+  // Sports
+  "SOCCER", "BASKETBALL", "BASEBALL", "FOOTBALL", "TENNIS", "GOLF", "HOCKEY", "VOLLEYBALL", "RUGBY", "CRICKET",
+  "SWIMMING", "RUNNING", "JUMPING", "CYCLING", "SKATING", "SKIING", "SURFING", "KARATE", "BOXING", "WRESTLING",
+  "GYMNASTICS", "DANCE", "YOGA", "PILATES", "HIKING", "CAMPING", "FISHING", "HUNTING", "BOWLING", "ARCHERY",
+  
+  // School
+  "PENCIL", "PEN", "ERASER", "RULER", "PAPER", "BOOK", "NOTEBOOK", "DESK", "CHAIR", "BOARD",
+  "TEACHER", "STUDENT", "CLASS", "SCHOOL", "HOMEWORK", "TEST", "EXAM", "GRADE", "SUBJECT", "MATH",
+  "SCIENCE", "HISTORY", "ART", "MUSIC", "GYM", "RECESS", "LUNCH", "FRIEND", "LEARN", "STUDY",
+  
+  // Nature
+  "TREE", "FLOWER", "GRASS", "LEAF", "BRANCH", "ROOT", "FOREST", "JUNGLE", "DESERT", "OCEAN",
+  "RIVER", "LAKE", "POND", "STREAM", "MOUNTAIN", "HILL", "VALLEY", "CANYON", "ISLAND", "BEACH",
+  "SAND", "ROCK", "STONE", "DIRT", "MUD", "RAIN", "SNOW", "WIND", "STORM", "CLOUD"
+];
+
+export function getRandomDefaultWords(min = 5, max = 10): string {
+  const count = Math.floor(Math.random() * (max - min + 1)) + min;
+  const shuffled = [...WORD_POOL].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count).join(',');
+}
