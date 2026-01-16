@@ -1,7 +1,3 @@
-## 2025-02-27 - Range Input Accessibility
-**Learning:** `input[type="range"]` needs `aria-valuetext` to provide context for screen readers, as the raw number value is often meaningless without the scale or unit.
-**Action:** Always add `aria-valuetext` (e.g., "5 out of 10") to sliders.
-
-## 2025-02-27 - Checkbox Grouping
-**Learning:** Grouping checkboxes with `<div>` and a `label` disconnects the group title from the controls for screen readers. `<fieldset>` with `<legend>` is the semantic standard.
-**Action:** Use `<fieldset>` and `<legend>` for groups of related controls.
+## 2024-03-21 - Instant Form Validation
+**Learning:** Users typing configuration values (like lists) benefit from instant inline validation before hitting a "Submit" or "Generate" action. Waiting for a generation failure is frustrating.
+**Action:** Implement `useMemo` or effect-based validation for text inputs that have hard constraints (like max length vs grid size) and display warnings immediately with `role="alert"`.

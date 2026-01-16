@@ -26,6 +26,15 @@ export default function WordSearchBuilder() {
   const [isCopied, setIsCopied] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
 
+  // Validate words against grid dimensions
+  const invalidWords = useMemo(() => {
+    const maxLen = Math.max(width, height);
+    return wordsRaw
+      .split(/[\n,]+/)
+      .map(w => w.trim())
+      .filter(w => w.length > maxLen);
+  }, [wordsRaw, width, height]);
+
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -313,6 +322,13 @@ export default function WordSearchBuilder() {
               <p className="text-xs text-gray-500">
                 {wordsRaw.split(/[\n,]+/).filter(w => w.trim().length > 0).length} words
               </p>
+              {invalidWords.length > 0 && (
+                <div role="alert" className="text-xs text-red-600 font-medium">
+                  {invalidWords.length === 1
+                    ? `"${invalidWords[0]}" is too long for the grid.`
+                    : `${invalidWords.length} words are too long for the grid.`}
+                </div>
+              )}
             </div>
 
             {/* Actions */}
