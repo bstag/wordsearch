@@ -14,8 +14,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Word Search Generator",
-  description: "Create and print custom word search puzzles",
+  title: {
+    default: "Word Search Generator | Create & Play Online",
+    template: "%s | Word Search Generator"
+  },
+  description: "Free online word search maker. Create custom printable puzzles, play online, or share with friends. No signup required.",
+  keywords: ["word search", "puzzle maker", "word search generator", "educational games", "classroom tools", "printable puzzles"],
+  authors: [{ name: "StagWare" }],
+  creator: "StagWare",
+  publisher: "StagWare",
+  applicationName: "Word Search Generator",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://wordsearch.stagware.com", // Placeholder URL
+    title: "Word Search Generator | Create & Play Online",
+    description: "Create, print, and share custom word search puzzles instantly.",
+    siteName: "Word Search Generator",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Word Search Generator",
+    description: "Create, print, and share custom word search puzzles instantly.",
+    creator: "@bstag", // Placeholder
+  },
+  robots: {
+    index: true,
+    follow: true,
+  }
 };
 
 export default function RootLayout({
