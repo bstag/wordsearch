@@ -5,3 +5,7 @@
 ## 2024-05-24 - Frontend Stabilization
 **Learning:** Passing volatile configuration state (like `width` input) directly to a visualization component (like `PuzzleGrid`) causes expensive re-renders and visual glitches before the new data is actually generated.
 **Action:** Decouple preview components from form state. Derive dimensions from the actual data (`grid[0].length`) inside the component, and use the *active* data dimensions (not form state) for calculating dependent props like `printCellSize`. This acts as a natural "debounce" for the heavy rendering parts.
+
+## 2024-05-28 - Micro-optimization: Map vs Array
+**Learning:** In a hot loop (word placement retry logic), using a `Map<number, T>` to cache configuration objects keyed by word length was slower than re-calculating the objects. However, using a pre-allocated `Array(21)` for the same cache provided a measurable (~7%) speedup.
+**Action:** For caching data keyed by small integers (like word lengths) in performance-critical code, prefer sparse arrays or pre-allocated arrays over `Map` to avoid lookup overhead.
