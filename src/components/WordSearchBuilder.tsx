@@ -198,6 +198,7 @@ export default function WordSearchBuilder() {
               <input
                 id="title"
                 type="text"
+                maxLength={50}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -304,6 +305,7 @@ export default function WordSearchBuilder() {
               </label>
               <textarea
                 id="wordlist"
+                maxLength={2500}
                 value={wordsRaw}
                 onChange={(e) => setWordsRaw(e.target.value)}
                 rows={10}
