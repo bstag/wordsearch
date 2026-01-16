@@ -4,7 +4,8 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
 import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
-import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff } from 'lucide-react';
+import { PlayablePuzzleGrid } from './PlayablePuzzleGrid';
+import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play } from 'lucide-react';
 import { z } from 'zod';
 
 export default function WordSearchBuilder() {
@@ -18,6 +19,7 @@ export default function WordSearchBuilder() {
   const [showGridLines, setShowGridLines] = useQueryState('gridLines', parseAsBoolean.withDefault(false));
   const [showAnswerKey, setShowAnswerKey] = useQueryState('answerKey', parseAsBoolean.withDefault(true));
   const [difficulty, setDifficulty] = useQueryState('difficulty', parseAsInteger.withDefault(5));
+  const [runMode, setRunMode] = useQueryState('run', parseAsBoolean.withDefault(false));
 
   // Internal state for the generated puzzle
   const [puzzle, setPuzzle] = useState<GeneratedPuzzle | null>(null);
@@ -25,6 +27,7 @@ export default function WordSearchBuilder() {
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
+  const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
 
   // Validate words against grid dimensions
   const invalidWords = useMemo(() => {
@@ -37,12 +40,24 @@ export default function WordSearchBuilder() {
 
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      const url = new URL(window.location.href);
+      if (runMode) {
+        url.searchParams.set('run', 'true');
+      }
+      await navigator.clipboard.writeText(url.toString());
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy URL:', err);
     }
+  };
+
+  const handleWordFound = (word: string) => {
+    setFoundWords(prev => {
+      const newSet = new Set(prev);
+      newSet.add(word);
+      return newSet;
+    });
   };
 
   const generate = useCallback(() => {
@@ -62,6 +77,7 @@ export default function WordSearchBuilder() {
         };
         const result = generatePuzzle(config);
         setPuzzle(result);
+        setFoundWords(new Set());
       } catch (err) {
         console.error('Generation failed:', err);
         if (err instanceof z.ZodError) {
@@ -193,7 +209,8 @@ export default function WordSearchBuilder() {
     >
       <div className="flex flex-col md:flex-row min-h-screen">
         
-        {/* Configuration Sidebar - Hidden on Print */}
+        {/* Configuration Sidebar - Hidden on Print and Run Mode */}
+        {!runMode && (
         <div className="w-full md:w-80 bg-white border-r border-gray-200 p-6 flex-shrink-0 print:hidden overflow-y-auto h-screen sticky top-0">
           <div className="mb-6 flex items-center gap-2 text-indigo-600">
             <Settings className="w-6 h-6" />
@@ -344,6 +361,13 @@ export default function WordSearchBuilder() {
                 {isGenerating ? 'Generating...' : 'Regenerate Puzzle'}
               </button>
               <button
+                onClick={() => setRunMode(true)}
+                className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Play Online
+              </button>
+              <button
                 onClick={() => window.print()}
                 className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
@@ -376,6 +400,7 @@ export default function WordSearchBuilder() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Preview Area */}
         <div className="flex-1 p-8 overflow-auto print:p-0 print:overflow-visible">
@@ -411,6 +436,7 @@ export default function WordSearchBuilder() {
               </h1>
 
               <div className="print:hidden flex justify-center mt-2">
+                {!runMode && (
                 <button
                   onClick={() => setShowSolution(!showSolution)}
                   className="flex items-center text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
@@ -420,6 +446,7 @@ export default function WordSearchBuilder() {
                   {showSolution ? <EyeOff className="w-4 h-4 mr-1.5" /> : <Eye className="w-4 h-4 mr-1.5" />}
                   {showSolution ? "Hide Solution" : "Show Solution"}
                 </button>
+                )}
               </div>
 
             </div>
@@ -427,14 +454,23 @@ export default function WordSearchBuilder() {
             {/* Grid */}
             {puzzle && (
               <div className="flex justify-center mb-10" style={{ marginBottom: 'var(--print-title-margin)' }}>
-                <PuzzleGrid
-                  grid={puzzle.grid}
-                  showGridLines={showGridLines}
-                  printCellSize={printCellSize}
-                  printFontSize={printFontSize}
-                  solutionSet={solutionSet}
-                  highlightSolution={showSolution}
-                />
+                {runMode ? (
+                  <PlayablePuzzleGrid
+                    grid={puzzle.grid}
+                    placedWords={puzzle.placedWords}
+                    foundWords={foundWords}
+                    onWordFound={handleWordFound}
+                  />
+                ) : (
+                  <PuzzleGrid
+                    grid={puzzle.grid}
+                    showGridLines={showGridLines}
+                    printCellSize={printCellSize}
+                    printFontSize={printFontSize}
+                    solutionSet={solutionSet}
+                    highlightSolution={showSolution}
+                  />
+                )}
               </div>
             )}
 
@@ -453,7 +489,7 @@ export default function WordSearchBuilder() {
                 {puzzle?.placedWords.map((item, idx) => (
                   <li 
                     key={idx} 
-                    className="text-sm md:text-base print:text-black"
+                    className={`text-sm md:text-base print:text-black ${runMode && foundWords.has(item.word) ? 'line-through text-gray-400' : ''}`}
                     style={{ fontSize: 'var(--print-wordbank-size)' }}
                   >
                     <span className="inline-block w-4 h-4 border border-gray-400 mr-2" style={{ width: '0.8em', height: '0.8em' }}></span>
