@@ -58,27 +58,35 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
     allDirections = [...allDirections, ...backwardDirections];
   }
 
+  // ⚡ Performance: Cache valid direction configs by word length to avoid re-calculation
+  const validConfigsCache: { dir: { x: number; y: number }, minX: number, maxX: number, minY: number, maxY: number }[][] = new Array(21);
+
   // Helper to place a word
   // Assumes word is already upper-case and clean (A-Z only)
   const placeWord = (cleanWord: string, isDistractor: boolean): boolean => {
     const maxAttempts = 100;
     const wordLen = cleanWord.length;
     
-    // Pre-calculate valid directions and their bounds to avoid redundant checks inside the retry loop
-    const validConfigs = [];
-    for (const dir of allDirections) {
-      let minX = 0, maxX = width;
-      if (dir.x === 1) maxX = width - wordLen + 1;
-      else if (dir.x === -1) minX = wordLen - 1;
+    // Check cache first
+    let validConfigs = validConfigsCache[wordLen];
 
-      let minY = 0, maxY = height;
-      if (dir.y === 1) maxY = height - wordLen + 1;
-      else if (dir.y === -1) minY = wordLen - 1;
+    if (!validConfigs) {
+      validConfigs = [];
+      for (const dir of allDirections) {
+        let minX = 0, maxX = width;
+        if (dir.x === 1) maxX = width - wordLen + 1;
+        else if (dir.x === -1) minX = wordLen - 1;
 
-      // Only add direction if the word fits within grid dimensions
-      if (maxX > minX && maxY > minY) {
-        validConfigs.push({ dir, minX, maxX, minY, maxY });
+        let minY = 0, maxY = height;
+        if (dir.y === 1) maxY = height - wordLen + 1;
+        else if (dir.y === -1) minY = wordLen - 1;
+
+        // Only add direction if the word fits within grid dimensions
+        if (maxX > minX && maxY > minY) {
+          validConfigs.push({ dir, minX, maxX, minY, maxY });
+        }
       }
+      validConfigsCache[wordLen] = validConfigs;
     }
 
     if (validConfigs.length === 0) return false;
