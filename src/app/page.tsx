@@ -2,33 +2,12 @@ import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
 import WordSearchBuilder from '@/components/WordSearchBuilder';
 
-type Props = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
+export const dynamic = 'force-static';
 
-export async function generateMetadata(
-  { searchParams }: Props,
-): Promise<Metadata> {
-  const params = await searchParams;
-  const title = typeof params.title === 'string' 
-    ? decodeURIComponent(params.title) 
-    : undefined;
-
-  if (title && title !== 'My Word Search') {
-    return {
-      title: title,
-      description: `Play "${title}" - a custom word search puzzle created with Word Search Generator.`,
-      openGraph: {
-        title: `${title} | Word Search Generator`,
-        description: `Play "${title}" - a custom word search puzzle.`,
-      }
-    }
-  }
-
-  return {
-    title: 'Create Your Puzzle',
-  }
-}
+export const metadata: Metadata = {
+  title: 'Create Your Puzzle',
+  description: 'Free online word search maker. Create custom printable puzzles, play online, or share with friends.',
+};
 
 export default function Home() {
   const jsonLd = {
