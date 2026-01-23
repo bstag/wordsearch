@@ -6,11 +6,11 @@ interface PuzzleGridProps {
   showGridLines: boolean;
   printCellSize: number;
   printFontSize: number;
-  solutionSet?: Set<string>;
+  solutionGrid?: boolean[][];
   highlightSolution?: boolean;
 }
 
-const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionSet, highlightSolution }: PuzzleGridProps) => {
+const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionGrid, highlightSolution }: PuzzleGridProps) => {
   // ⚡ Performance: Derive width from grid to prevent re-renders when config changes but grid hasn't regenerated yet.
   const gridWidth = grid[0]?.length || 0;
 
@@ -24,7 +24,7 @@ const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSi
     >
       {grid.map((row, y) => (
         row.map((cell, x) => {
-          const isHighlighted = highlightSolution && solutionSet?.has(`${x},${y}`);
+          const isHighlighted = highlightSolution && solutionGrid?.[y]?.[x];
           return (
             <div
               key={`${x}-${y}`}
@@ -51,16 +51,12 @@ interface AnswerKeyGridProps {
   showGridLines: boolean;
   printCellSize: number;
   printFontSize: number;
-  solutionSet: Set<string>;
+  solutionGrid: boolean[][];
 }
 
-const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionSet }: AnswerKeyGridProps) => {
+const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionGrid }: AnswerKeyGridProps) => {
   // ⚡ Performance: Derive width from grid to prevent re-renders when config changes but grid hasn't regenerated yet.
   const gridWidth = grid[0]?.length || 0;
-
-  const isCellInSolution = (x: number, y: number) => {
-    return solutionSet.has(`${x},${y}`);
-  };
 
   return (
     <div
@@ -72,7 +68,7 @@ const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFon
     >
       {grid.map((row, y) => (
         row.map((cell, x) => {
-          const isSolution = isCellInSolution(x, y);
+          const isSolution = solutionGrid?.[y]?.[x];
           return (
             <div
               key={`${x}-${y}`}
