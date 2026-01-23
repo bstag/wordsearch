@@ -321,7 +321,13 @@ export default function WordSearchBuilder() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <label htmlFor="difficulty" className="text-sm font-medium text-gray-700">Difficulty (Distractors)</label>
-                <span className="text-xs text-gray-500">{difficulty}/10</span>
+                <span className="text-xs text-gray-500 font-medium">
+                  {difficulty}/10 <span className="text-gray-400">({
+                    difficulty <= 2 ? 'Easy' :
+                    difficulty <= 5 ? 'Medium' :
+                    difficulty <= 8 ? 'Hard' : 'Expert'
+                  })</span>
+                </span>
               </div>
               <input
                 id="difficulty"
@@ -330,10 +336,20 @@ export default function WordSearchBuilder() {
                 max="10"
                 value={difficulty}
                 onChange={(e) => setDifficulty(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                 aria-label="Difficulty level (number of distractors)"
-                aria-valuetext={`${difficulty} out of 10`}
+                aria-valuetext={`${difficulty} out of 10, ${
+                  difficulty <= 2 ? 'Easy' :
+                  difficulty <= 5 ? 'Medium' :
+                  difficulty <= 8 ? 'Hard' : 'Expert'
+                }`}
               />
+              <div className="flex justify-between text-[10px] text-gray-400 px-1 font-medium select-none" aria-hidden="true">
+                <span>Easy</span>
+                <span>Medium</span>
+                <span>Hard</span>
+                <span>Expert</span>
+              </div>
             </div>
 
             {/* Word List */}
