@@ -163,11 +163,14 @@ export default function WordSearchBuilder() {
     return () => clearTimeout(timer);
   }, [width, height, wordsRaw, allowBackwards, allowDiagonals, difficulty, generate]);
 
-  // Pre-calculate the solution set for faster lookup
-  const solutionSet = useMemo(() => {
-    if (!puzzle) return new Set<string>();
+  // Pre-calculate the solution grid for faster lookup (O(1) vs O(1) but avoids string allocs)
+  const solutionGrid = useMemo(() => {
+    if (!puzzle) return [];
 
-    const set = new Set<string>();
+    const rows = puzzle.grid.length;
+    const cols = puzzle.grid[0].length;
+    const grid = Array(rows).fill(null).map(() => Array(cols).fill(false));
+
     puzzle.placedWords.forEach(word => {
       const dx = Math.sign(word.endX - word.startX);
       const dy = Math.sign(word.endY - word.startY);
@@ -176,10 +179,12 @@ export default function WordSearchBuilder() {
       for (let i = 0; i < length; i++) {
         const x = word.startX + i * dx;
         const y = word.startY + i * dy;
-        set.add(`${x},${y}`);
+        if (grid[y] && grid[y][x] !== undefined) {
+          grid[y][x] = true;
+        }
       }
     });
-    return set;
+    return grid;
   }, [puzzle]);
 
   // Calculate dynamic cell size for print
@@ -511,7 +516,7 @@ export default function WordSearchBuilder() {
                     showGridLines={showGridLines}
                     printCellSize={printCellSize}
                     printFontSize={printFontSize}
-                    solutionSet={solutionSet}
+                    solutionGrid={solutionGrid}
                     highlightSolution={showSolution}
                   />
                 )}
@@ -569,7 +574,7 @@ export default function WordSearchBuilder() {
                     showGridLines={showGridLines}
                     printCellSize={printCellSize}
                     printFontSize={printFontSize}
-                    solutionSet={solutionSet}
+                    solutionGrid={solutionGrid}
                   />
                 </div>
                 
