@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString } from 'nuqs';
+import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString, createParser } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
 import { getRandomDefaultWords } from '@/lib/wordPool';
 import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
@@ -14,8 +14,18 @@ export default function WordSearchBuilder() {
   const [title, setTitle] = useQueryState('title', parseAsString.withDefault('My Word Search'));
   const [width, setWidth] = useQueryState('width', parseAsInteger.withDefault(15));
   const [height, setHeight] = useQueryState('height', parseAsInteger.withDefault(15));
+
+  // Security: Limit input length to prevent DoS via URL (matches UI maxLength)
+  const parseAsLimitedString = createParser({
+    parse: (queryValue) => {
+      const parsed = parseAsString.parse(queryValue);
+      return parsed && parsed.length > 2500 ? parsed.slice(0, 2500) : parsed;
+    },
+    serialize: (value) => parseAsString.serialize(value),
+  });
+
   // We use a specific placeholder to detect if we should randomize on first load
-  const [wordsRaw, setWordsRaw] = useQueryState('words', parseAsString.withDefault('')); 
+  const [wordsRaw, setWordsRaw] = useQueryState('words', parseAsLimitedString.withDefault(''));
   const [allowBackwards, setAllowBackwards] = useQueryState('backwards', parseAsBoolean.withDefault(true));
   const [allowDiagonals, setAllowDiagonals] = useQueryState('diagonals', parseAsBoolean.withDefault(true));
   const [showGridLines, setShowGridLines] = useQueryState('gridLines', parseAsBoolean.withDefault(false));
