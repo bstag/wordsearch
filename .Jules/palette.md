@@ -5,3 +5,7 @@
 ## 2024-05-22 - Semantic Range Inputs
 **Learning:** Abstract number ranges (0-10) for difficulty settings lack meaning for users. Adding semantic labels (Easy, Medium, Hard) along with the visual scale clarifies the impact of the setting.
 **Action:** When using `input type="range"`, always provide semantic text labels for key values and include them in `aria-valuetext`.
+
+## 2025-02-28 - Play Mode Accessibility Gap
+**Learning:** When an application switches modes by replacing the entire UI (e.g., Config -> Play), users lose context immediately. Without a persistent anchor or status region, screen readers have no way to know "where" they are or what the state of the new context is.
+**Action:** Always implement a dedicated `role="status"` or `aria-live` region that persists or appears immediately in the new mode to announce current game state and instructions.
