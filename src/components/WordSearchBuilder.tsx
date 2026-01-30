@@ -6,7 +6,7 @@ import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
 import { getRandomDefaultWords } from '@/lib/wordPool';
 import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
 import { PlayablePuzzleGrid } from './PlayablePuzzleGrid';
-import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play, Dice5, ArrowLeft } from 'lucide-react';
+import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play, Dice5, ArrowLeft, Trophy, MousePointerClick } from 'lucide-react';
 import { z } from 'zod';
 
 export default function WordSearchBuilder() {
@@ -47,6 +47,14 @@ export default function WordSearchBuilder() {
   const [isCopied, setIsCopied] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
+
+  // Calculate unique words count for accurate progress tracking
+  const totalUniqueWords = useMemo(() => {
+    if (!puzzle) return 0;
+    return new Set(puzzle.placedWords.map(w => w.word)).size;
+  }, [puzzle]);
+
+  const isComplete = totalUniqueWords > 0 && foundWords.size === totalUniqueWords;
 
   // Validate words against grid dimensions
   const invalidWords = useMemo(() => {
@@ -499,6 +507,31 @@ export default function WordSearchBuilder() {
               >
                 {title}
               </h1>
+
+              {/* Status Bar for Play Mode */}
+              {runMode && puzzle && (
+                <div
+                  className={`mt-4 mx-auto max-w-md p-3 rounded-lg text-center font-medium transition-colors border ${
+                    isComplete
+                      ? 'bg-green-100 text-green-800 border-green-200'
+                      : 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {isComplete ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Trophy className="w-5 h-5" />
+                      Puzzle Complete!
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2 text-sm">
+                      <MousePointerClick className="w-4 h-4" />
+                      Drag to select • Found {foundWords.size} of {totalUniqueWords}
+                    </span>
+                  )}
+                </div>
+              )}
 
               <div className="print:hidden flex justify-center mt-2">
                 {!runMode && (
