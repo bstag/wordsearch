@@ -31,9 +31,9 @@ export default function WordSearchBuilder() {
   // State synced with URL with security limits
   const [title, setTitle] = useQueryState('title', createMaxLengthStringParser(100).withDefault('My Word Search'));
 
-  // Grid dimensions limited to 5-50 (matches Zod schema)
-  const [width, setWidth] = useQueryState('width', createBoundedIntegerParser(5, 50).withDefault(15));
-  const [height, setHeight] = useQueryState('height', createBoundedIntegerParser(5, 50).withDefault(15));
+  // Grid dimensions limited to 5-30 (matches UI constraint)
+  const [width, setWidth] = useQueryState('width', createBoundedIntegerParser(5, 30).withDefault(15));
+  const [height, setHeight] = useQueryState('height', createBoundedIntegerParser(5, 30).withDefault(15));
 
   // Word list limited to 2500 chars (matches UI constraint)
   // We use a specific placeholder to detect if we should randomize on first load
