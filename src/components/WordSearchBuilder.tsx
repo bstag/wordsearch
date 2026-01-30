@@ -9,28 +9,44 @@ import { PlayablePuzzleGrid } from './PlayablePuzzleGrid';
 import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play, Dice5, ArrowLeft, Trophy, MousePointerClick } from 'lucide-react';
 import { z } from 'zod';
 
+// Security: Custom parsers to enforce limits on URL parameters
+const createBoundedIntegerParser = (min: number, max: number) => createParser({
+  parse: (queryValue) => {
+    const parsed = parseAsInteger.parse(queryValue);
+    if (parsed === null) return null;
+    return Math.min(Math.max(parsed, min), max);
+  },
+  serialize: (value) => parseAsInteger.serialize(value),
+});
+
+const createMaxLengthStringParser = (maxLength: number) => createParser({
+  parse: (queryValue) => {
+    const parsed = parseAsString.parse(queryValue);
+    return parsed && parsed.length > maxLength ? parsed.slice(0, maxLength) : parsed;
+  },
+  serialize: (value) => parseAsString.serialize(value),
+});
+
 export default function WordSearchBuilder() {
-  // State synced with URL
-  const [title, setTitle] = useQueryState('title', parseAsString.withDefault('My Word Search'));
-  const [width, setWidth] = useQueryState('width', parseAsInteger.withDefault(15));
-  const [height, setHeight] = useQueryState('height', parseAsInteger.withDefault(15));
+  // State synced with URL with security limits
+  const [title, setTitle] = useQueryState('title', createMaxLengthStringParser(100).withDefault('My Word Search'));
 
-  // Security: Limit input length to prevent DoS via URL (matches UI maxLength)
-  const parseAsLimitedString = createParser({
-    parse: (queryValue) => {
-      const parsed = parseAsString.parse(queryValue);
-      return parsed && parsed.length > 2500 ? parsed.slice(0, 2500) : parsed;
-    },
-    serialize: (value) => parseAsString.serialize(value),
-  });
+  // Grid dimensions limited to 5-30 (matches UI constraint)
+  const [width, setWidth] = useQueryState('width', createBoundedIntegerParser(5, 30).withDefault(15));
+  const [height, setHeight] = useQueryState('height', createBoundedIntegerParser(5, 30).withDefault(15));
 
+  // Word list limited to 2500 chars (matches UI constraint)
   // We use a specific placeholder to detect if we should randomize on first load
-  const [wordsRaw, setWordsRaw] = useQueryState('words', parseAsLimitedString.withDefault(''));
+  const [wordsRaw, setWordsRaw] = useQueryState('words', createMaxLengthStringParser(2500).withDefault(''));
+
   const [allowBackwards, setAllowBackwards] = useQueryState('backwards', parseAsBoolean.withDefault(true));
   const [allowDiagonals, setAllowDiagonals] = useQueryState('diagonals', parseAsBoolean.withDefault(true));
   const [showGridLines, setShowGridLines] = useQueryState('gridLines', parseAsBoolean.withDefault(false));
   const [showAnswerKey, setShowAnswerKey] = useQueryState('answerKey', parseAsBoolean.withDefault(true));
-  const [difficulty, setDifficulty] = useQueryState('difficulty', parseAsInteger.withDefault(5));
+
+  // Difficulty limited to 0-10
+  const [difficulty, setDifficulty] = useQueryState('difficulty', createBoundedIntegerParser(0, 10).withDefault(5));
+
   const [runMode, setRunMode] = useQueryState('run', parseAsBoolean.withDefault(false));
 
   // Initialize random words if empty
