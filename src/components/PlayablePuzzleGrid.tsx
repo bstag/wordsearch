@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { GeneratedPuzzle } from '@/lib/generator';
 
 interface PlayablePuzzleGridProps {
@@ -25,6 +25,39 @@ export const PlayablePuzzleGrid = ({
   const [selectionEnd, setSelectionEnd] = useState<Point | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
+
+  // ⚡ Performance: Pre-calculate found word colors to avoid O(Words * Length) checks per cell on every render.
+  // This reduces render complexity from O(W*H * Words) to O(W*H) during interaction.
+  const foundColorsGrid = useMemo(() => {
+    const rows = grid.length;
+    const cols = grid[0]?.length || 0;
+    const colors = Array(rows).fill(null).map(() => Array(cols).fill(''));
+
+    const palette = [
+      'bg-green-200', 'bg-blue-200', 'bg-red-200', 'bg-yellow-200',
+      'bg-purple-200', 'bg-pink-200', 'bg-indigo-200', 'bg-orange-200'
+    ];
+
+    placedWords.forEach((word, idx) => {
+      if (!foundWords.has(word.word)) return;
+
+      const colorClass = palette[idx % palette.length];
+
+      const dx = Math.sign(word.endX - word.startX);
+      const dy = Math.sign(word.endY - word.startY);
+      const length = Math.max(Math.abs(word.endX - word.startX), Math.abs(word.endY - word.startY)) + 1;
+
+      for (let i = 0; i < length; i++) {
+        const x = word.startX + i * dx;
+        const y = word.startY + i * dy;
+        if (colors[y] && colors[y][x] !== undefined) {
+          colors[y][x] = colorClass;
+        }
+      }
+    });
+
+    return colors;
+  }, [grid, placedWords, foundWords]);
 
   // Helper to get cell coordinates from event
   const getCellCoords = (e: React.MouseEvent | React.TouchEvent): Point | null => {
@@ -158,86 +191,6 @@ export const PlayablePuzzleGrid = ({
     }
   };
 
-  // Determine if a cell is part of a found word
-  const isCellFound = (x: number, y: number) => {
-    for (const placedWord of placedWords) {
-      if (foundWords.has(placedWord.word)) {
-        // Check if point is on this word's line
-        const dx = placedWord.endX - placedWord.startX;
-        const dy = placedWord.endY - placedWord.startY;
-        const steps = Math.max(Math.abs(dx), Math.abs(dy));
-        const stepX = dx / steps;
-        const stepY = dy / steps;
-
-        // Check if (x,y) is on this segment
-        let k;
-        if (Math.abs(stepX) > 0) {
-          k = (x - placedWord.startX) / stepX;
-        } else {
-          k = (y - placedWord.startY) / stepY;
-        }
-
-        if (Math.abs(k - Math.round(k)) < 0.001) {
-          k = Math.round(k);
-          if (k >= 0 && k <= steps) {
-             if (Math.abs(stepX) > 0) {
-                if (Math.abs(y - (placedWord.startY + k * stepY)) < 0.001) return true;
-             } else {
-                if (Math.abs(x - (placedWord.startX + k * stepX)) < 0.001) return true;
-             }
-          }
-        }
-      }
-    }
-    return false;
-  };
-  
-  // Helper to determine the color class based on found status
-  const getFoundColorClass = (x: number, y: number) => {
-     // We could assign different colors to different words if we wanted, 
-     // but for now let's just use a standard "found" color.
-     // If we want multiple colors, we'd need to return the index of the found word 
-     // and map it to a color palette.
-     
-     // Let's see which word it belongs to (first match)
-     let foundIndex = -1;
-     placedWords.forEach((word, idx) => {
-        if (!foundWords.has(word.word)) return;
-        
-        const dx = word.endX - word.startX;
-        const dy = word.endY - word.startY;
-        const steps = Math.max(Math.abs(dx), Math.abs(dy));
-        const stepX = dx / steps;
-        const stepY = dy / steps;
-        
-        let k;
-        if (Math.abs(stepX) > 0) {
-          k = (x - word.startX) / stepX;
-        } else {
-          k = (y - word.startY) / stepY;
-        }
-        
-        if (Math.abs(k - Math.round(k)) < 0.001) {
-          k = Math.round(k);
-          if (k >= 0 && k <= steps) {
-             if (Math.abs(stepX) > 0) {
-                if (Math.abs(y - (word.startY + k * stepY)) < 0.001) foundIndex = idx;
-             } else {
-                if (Math.abs(x - (word.startX + k * stepX)) < 0.001) foundIndex = idx;
-             }
-          }
-        }
-     });
-     
-     if (foundIndex === -1) return '';
-     
-     const colors = [
-       'bg-green-200', 'bg-blue-200', 'bg-red-200', 'bg-yellow-200', 
-       'bg-purple-200', 'bg-pink-200', 'bg-indigo-200', 'bg-orange-200'
-     ];
-     return colors[foundIndex % colors.length];
-  };
-
   // Prevent scrolling when touching the grid
   useEffect(() => {
     const gridEl = gridRef.current;
@@ -271,7 +224,7 @@ export const PlayablePuzzleGrid = ({
       {grid.map((row, y) => (
         row.map((cell, x) => {
           const selected = isCellSelected(x, y);
-          const foundColor = getFoundColorClass(x, y);
+          const foundColor = foundColorsGrid[y][x];
           
           return (
             <div

@@ -13,3 +13,7 @@
 ## 2025-02-26 - Rendering Optimization: Set vs Boolean Grid
 **Learning:** Replacing `Set<string>` (using "x,y" keys) with a pre-allocated `boolean[][]` grid for coordinate lookups reduced lookup overhead by ~7x during rendering. The cost of string allocation and hashing for every cell in a large grid is significant.
 **Action:** For dense grid-based lookups where dimensions are known and limited (e.g., <100x100), prefer `boolean[][]` or flat arrays over `Set<string>` to avoid garbage collection pressure and improve render speed.
+
+## 2025-02-28 - Interactive Grid Optimization
+**Learning:** In interactive grids, performing geometric checks (like point-on-line segment) for every cell against every object on every render frame (e.g., during drag selection) causes significant lag (O(W*H*N)).
+**Action:** Memoize the visual state of the grid into a lookup array (e.g., `string[][]` for classes) dependent only on the data, not the interaction state. This makes the render loop O(1) per cell.
