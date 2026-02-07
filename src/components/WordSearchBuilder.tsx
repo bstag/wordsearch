@@ -433,8 +433,8 @@ export default function WordSearchBuilder() {
               {invalidWords.length > 0 && (
                 <div role="alert" className="text-xs text-red-600 font-medium">
                   {invalidWords.length === 1
-                    ? `"${invalidWords[0]}" is too long (max 20 chars or grid size).`
-                    : `${invalidWords.length} words are too long (max 20 chars or grid size).`}
+                    ? `"${invalidWords[0]}" is too long (max ${Math.min(20, Math.max(width, height))} chars; limited by ${Math.max(width, height) > 20 ? 'schema limit of 20 characters' : 'current grid size'}).`
+                    : `${invalidWords.length} words are too long (max ${Math.min(20, Math.max(width, height))} chars; limited by ${Math.max(width, height) > 20 ? 'schema limit of 20 characters' : 'current grid size'}).`}
                 </div>
               )}
               {!isWordCountValid && (
