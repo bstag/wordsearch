@@ -9,3 +9,7 @@
 ## 2025-02-28 - Play Mode Accessibility Gap
 **Learning:** When an application switches modes by replacing the entire UI (e.g., Config -> Play), users lose context immediately. Without a persistent anchor or status region, screen readers have no way to know "where" they are or what the state of the new context is.
 **Action:** Always implement a dedicated `role="status"` or `aria-live` region that persists or appears immediately in the new mode to announce current game state and instructions.
+
+## 2025-10-27 - Visual & Semantic State Confirmation
+**Learning:** Relying solely on text styles (like `line-through`) to indicate state changes (like "found word") is insufficient for accessibility and visual clarity. Users with low vision or cognitive load benefit from explicit iconography (checkmarks) and screen readers require semantic text (hidden or aria-label).
+**Action:** Always pair state-change styles with explicit icons and screen-reader-only text (e.g., "Found") to ensure the status is communicated clearly to all users.
