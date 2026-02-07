@@ -17,3 +17,7 @@
 ## 2025-02-28 - Interactive Grid Optimization
 **Learning:** In interactive grids, performing geometric checks (like point-on-line segment) for every cell against every object on every render frame (e.g., during drag selection) causes significant lag (O(W*H*N)).
 **Action:** Memoize the visual state of the grid into a lookup array (e.g., `string[][]` for classes) dependent only on the data, not the interaction state. This makes the render loop O(1) per cell.
+
+## 2025-03-02 - CSS Variables for List Rendering
+**Learning:** Passing dynamic style objects (like `{{ width: size }}`) to thousands of children components in a list/grid creates thousands of new objects per render, forcing React to diff them all.
+**Action:** Define a constant style object using CSS variables (e.g., `width: var(--size)`) and update the variables on the parent container. This reduces style prop reconciliation to O(1) (reference equality) and delegates layout updates to the browser's CSS engine.
