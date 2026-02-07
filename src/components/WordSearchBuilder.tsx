@@ -72,14 +72,25 @@ export default function WordSearchBuilder() {
 
   const isComplete = totalUniqueWords > 0 && foundWords.size === totalUniqueWords;
 
-  // Validate words against grid dimensions
-  const invalidWords = useMemo(() => {
-    const maxLen = Math.max(width, height);
+  // Security: Pre-validate words against schema limits to prevent Zod errors
+  // This ensures the generator never receives invalid input that would cause a crash/exception
+  const wordList = useMemo(() => {
     return wordsRaw
       .split(/[\n,]+/)
       .map(w => w.trim())
-      .filter(w => w.length > maxLen);
-  }, [wordsRaw, width, height]);
+      .filter(w => w.length > 0);
+  }, [wordsRaw]);
+
+  const invalidWords = useMemo(() => {
+    // Grid dimension limit (physical constraint)
+    const maxGridLen = Math.max(width, height);
+    // Schema limit (logical constraint to prevent performance issues)
+    const maxSchemaLen = 20;
+
+    return wordList.filter(w => w.length > maxGridLen || w.length > maxSchemaLen);
+  }, [wordList, width, height]);
+
+  const isWordCountValid = wordList.length <= 100;
 
   const handleRandomizeWords = () => {
     setWordsRaw(getRandomDefaultWords());
@@ -417,13 +428,18 @@ export default function WordSearchBuilder() {
                 placeholder="Enter words separated by commas or newlines"
               />
               <p className="text-xs text-gray-500">
-                {wordsRaw.split(/[\n,]+/).filter(w => w.trim().length > 0).length} words
+                {wordList.length} words
               </p>
               {invalidWords.length > 0 && (
                 <div role="alert" className="text-xs text-red-600 font-medium">
                   {invalidWords.length === 1
-                    ? `"${invalidWords[0]}" is too long for the grid.`
-                    : `${invalidWords.length} words are too long for the grid.`}
+                    ? `"${invalidWords[0]}" is too long (max ${Math.min(20, Math.max(width, height))} chars; limited by ${Math.max(width, height) > 20 ? 'schema limit of 20 characters' : 'current grid size'}).`
+                    : `${invalidWords.length} words are too long (max ${Math.min(20, Math.max(width, height))} chars; limited by ${Math.max(width, height) > 20 ? 'schema limit of 20 characters' : 'current grid size'}).`}
+                </div>
+              )}
+              {!isWordCountValid && (
+                <div role="alert" className="text-xs text-red-600 font-medium mt-1">
+                  Too many words ({wordList.length}/100 max).
                 </div>
               )}
             </div>
@@ -432,8 +448,8 @@ export default function WordSearchBuilder() {
             <div className="pt-4 space-y-3">
               <button
                 onClick={generate}
-                disabled={isGenerating}
-                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isGenerating ? 'opacity-75 cursor-not-allowed' : ''}`}
+                disabled={isGenerating || invalidWords.length > 0 || !isWordCountValid}
+                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(isGenerating || invalidWords.length > 0 || !isWordCountValid) ? 'opacity-75 cursor-not-allowed' : ''}`}
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
                 {isGenerating ? 'Generating...' : 'Regenerate Puzzle'}

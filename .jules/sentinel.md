@@ -12,3 +12,8 @@
 **Vulnerability:** URL parameters mapped to state (via `nuqs`) can be arbitrarily long, bypassing UI `maxLength` constraints and causing main-thread freezing (DoS) during processing (e.g., regex splitting).
 **Learning:** `nuqs` parsers like `parseAsString` do not enforce length limits by default.
 **Prevention:** Use `createParser` to implement custom parsers that enforce length limits or sanitization at the URL parsing layer, ensuring state is always valid/safe before it reaches React components.
+
+## 2025-02-18 - Input Validation Layer Mismatch
+**Vulnerability:** User interface validation was looser than backend schema validation, allowing users to submit configurations (e.g., words > 20 chars) that caused unhandled exceptions in the generator logic.
+**Learning:** Relying solely on `zod` schema validation in the logic layer is insufficient for UX; the UI must enforce the same (or stricter) constraints to prevent error states.
+**Prevention:** Mirror schema constraints (like max string length and array size) in the UI validation logic and disable submission if invalid.
