@@ -603,11 +603,22 @@ export default function WordSearchBuilder() {
                 {puzzle?.placedWords.map((item, idx) => (
                   <li 
                     key={idx} 
-                    className={`text-sm md:text-base print:text-black ${runMode && foundWords.has(item.word) ? 'line-through text-gray-400' : ''}`}
+                    className={`flex items-center text-sm md:text-base print:text-black transition-colors ${runMode && foundWords.has(item.word) ? 'line-through text-gray-400 decoration-gray-400' : ''}`}
                     style={{ fontSize: 'var(--print-wordbank-size)' }}
                   >
-                    <span className="inline-block w-4 h-4 border border-gray-400 mr-2" style={{ width: '0.8em', height: '0.8em' }}></span>
-                    {item.word}
+                    <span
+                      className={`inline-flex items-center justify-center border mr-2 flex-shrink-0 ${runMode && foundWords.has(item.word) ? 'border-green-500 bg-green-50' : 'border-gray-400'}`}
+                      style={{ width: '1em', height: '1em' }}
+                      aria-hidden="true"
+                    >
+                      {runMode && foundWords.has(item.word) && (
+                        <Check className="text-green-600" style={{ width: '80%', height: '80%' }} strokeWidth={3} />
+                      )}
+                    </span>
+                    <span>
+                      {item.word}
+                      {runMode && foundWords.has(item.word) && <span className="sr-only"> (Found)</span>}
+                    </span>
                   </li>
                 ))}
               </ul>
