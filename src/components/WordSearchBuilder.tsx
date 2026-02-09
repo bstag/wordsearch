@@ -497,7 +497,7 @@ export default function WordSearchBuilder() {
         )}
 
         {/* Preview Area */}
-        <div className="flex-1 p-8 overflow-auto print:p-0 print:overflow-visible">
+        <div className="flex-1 p-4 md:p-8 overflow-auto print:p-0 print:overflow-visible">
           <div className="max-w-4xl mx-auto print:max-w-none print:w-full">
             
             {/* Error Message */}
@@ -521,7 +521,7 @@ export default function WordSearchBuilder() {
             )}
 
             {/* Puzzle Header */}
-            <div className="mb-8 text-center" style={{ marginBottom: 'var(--print-title-margin)' }}>
+            <div className="mb-4 md:mb-8 text-center print:mb-[var(--print-title-margin)]">
               {runMode && (
                 <div className="mb-4 flex justify-center print:hidden">
                   <button
@@ -534,8 +534,7 @@ export default function WordSearchBuilder() {
                 </div>
               )}
               <h1 
-                className="text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider"
-                style={{ fontSize: 'var(--print-title-size)' }}
+                className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider print:text-[length:var(--print-title-size)]"
               >
                 {title}
               </h1>
@@ -583,7 +582,7 @@ export default function WordSearchBuilder() {
 
             {/* Grid */}
             {puzzle && (
-              <div className="flex justify-center mb-10" style={{ marginBottom: 'var(--print-title-margin)' }}>
+              <div className="flex justify-center mb-6 md:mb-10" style={{ marginBottom: 'var(--print-title-margin)' }}>
                 {runMode ? (
                   <PlayablePuzzleGrid
                     grid={puzzle.grid}

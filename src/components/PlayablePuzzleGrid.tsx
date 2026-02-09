@@ -209,7 +209,7 @@ export const PlayablePuzzleGrid = ({
   return (
     <div 
       ref={gridRef}
-      className="inline-grid select-none touch-none border-2 border-gray-800 bg-white shadow-lg cursor-pointer"
+      className="grid w-full max-w-2xl mx-auto select-none touch-none border-2 border-gray-800 bg-white shadow-lg cursor-pointer"
       style={{
         gridTemplateColumns: `repeat(${grid[0].length}, minmax(0, 1fr))`,
       }}
@@ -232,9 +232,9 @@ export const PlayablePuzzleGrid = ({
               data-cell-x={x}
               data-cell-y={y}
               className={`
-                w-8 h-8 md:w-10 md:h-10 
+                aspect-square w-full
                 flex items-center justify-center 
-                text-lg md:text-xl font-bold uppercase
+                text-[clamp(0.7rem,4vw,1.5rem)] font-bold uppercase
                 border border-gray-200
                 transition-colors duration-150
                 ${selected ? 'bg-indigo-500 text-white transform scale-105 z-10 shadow-sm' : ''}
