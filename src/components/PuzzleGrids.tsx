@@ -13,9 +13,7 @@ interface PuzzleGridProps {
 // ⚡ Performance: Static style object to prevent re-creation on every cell render.
 // This allows React to skip style diffing for 1000+ cells when props change.
 const CELL_STYLE = {
-  width: 'var(--cell-size)',
-  height: 'var(--cell-size)',
-  fontSize: 'var(--font-size)',
+  // Removed width/height/fontSize to allow CSS classes to control it (fluid on mobile, fixed on desktop/print)
 } as React.CSSProperties;
 
 const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionGrid, highlightSolution }: PuzzleGridProps) => {
@@ -24,10 +22,9 @@ const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSi
 
   return (
     <div
-      className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
+      className={`grid bg-white select-none w-full md:w-fit ${showGridLines ? 'border-2 border-black' : ''}`}
       style={{
         gridTemplateColumns: `repeat(${gridWidth}, minmax(0, 1fr))`,
-        width: 'fit-content',
         '--cell-size': `${printCellSize}px`,
         '--font-size': `${printFontSize}px`,
       } as React.CSSProperties}
@@ -38,7 +35,7 @@ const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSi
           return (
             <div
               key={`${x}-${y}`}
-              className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-lg md:text-xl font-bold uppercase ${showGridLines ? 'border border-gray-300 print:border-gray-800' : ''} ${isHighlighted ? 'bg-yellow-100 text-indigo-700 print:bg-transparent print:text-black' : 'print:text-black'}`}
+              className={`aspect-square w-full md:w-[var(--cell-size)] md:h-[var(--cell-size)] print:w-[var(--cell-size)] print:h-[var(--cell-size)] flex items-center justify-center text-[clamp(0.7rem,3vw,1.25rem)] md:text-[length:var(--font-size)] print:text-[length:var(--font-size)] font-bold uppercase ${showGridLines ? 'border border-gray-300 print:border-gray-800' : ''} ${isHighlighted ? 'bg-yellow-100 text-indigo-700 print:bg-transparent print:text-black' : 'print:text-black'}`}
               style={CELL_STYLE}
             >
               {cell}
@@ -66,10 +63,9 @@ const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFon
 
   return (
     <div
-      className={`grid bg-white select-none ${showGridLines ? 'border-2 border-black' : ''}`}
+      className={`grid bg-white select-none w-full md:w-fit ${showGridLines ? 'border-2 border-black' : ''}`}
       style={{
         gridTemplateColumns: `repeat(${gridWidth}, minmax(0, 1fr))`,
-        width: 'fit-content',
         '--cell-size': `${printCellSize}px`,
         '--font-size': `${printFontSize}px`,
       } as React.CSSProperties}
@@ -80,7 +76,7 @@ const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFon
           return (
             <div
               key={`${x}-${y}`}
-              className={`w-9 h-9 flex items-center justify-center text-xl font-bold uppercase ${showGridLines ? 'border border-gray-800' : ''} text-black ${isSolution ? 'print:bg-transparent bg-gray-300' : ''}`}
+              className={`aspect-square w-full md:w-[var(--cell-size)] md:h-[var(--cell-size)] print:w-[var(--cell-size)] print:h-[var(--cell-size)] flex items-center justify-center text-[clamp(0.7rem,3vw,1.25rem)] md:text-[length:var(--font-size)] print:text-[length:var(--font-size)] font-bold uppercase ${showGridLines ? 'border border-gray-800' : ''} text-black ${isSolution ? 'print:bg-transparent bg-gray-300' : ''}`}
               style={CELL_STYLE}
             >
               <span className={isSolution ? 'text-black font-black print:text-black' : 'text-gray-300 print:text-transparent'}>
