@@ -534,8 +534,7 @@ export default function WordSearchBuilder() {
                 </div>
               )}
               <h1 
-                className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider"
-                style={{ fontSize: 'var(--print-title-size)' }}
+                className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider print:text-[length:var(--print-title-size)]"
               >
                 {title}
               </h1>
