@@ -521,7 +521,7 @@ export default function WordSearchBuilder() {
             )}
 
             {/* Puzzle Header */}
-            <div className="mb-4 md:mb-8 text-center" style={{ marginBottom: 'var(--print-title-margin)' }}>
+            <div className="mb-4 md:mb-8 text-center print:mb-[var(--print-title-margin)]">
               {runMode && (
                 <div className="mb-4 flex justify-center print:hidden">
                   <button
