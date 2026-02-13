@@ -40,8 +40,10 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   const validatedConfig = GeneratorConfigSchema.parse(config);
   const { width, height, words, allowBackwards, allowDiagonals, difficulty } = validatedConfig;
 
-  // Initialize empty grid
-  const grid: string[][] = Array(height).fill(null).map(() => Array(width).fill(''));
+  // ⚡ Performance: Use Uint8Array (flat buffer) instead of Array<Array<string>> for generation.
+  // This reduces memory allocation and avoids pointer chasing during the hot loop of collision checking.
+  // 0 represents empty cell. Char codes (65-90) represent letters.
+  const grid = new Uint8Array(width * height);
   const placedWords: WordLocation[] = [];
   const distractors: WordLocation[] = [];
 
@@ -101,22 +103,25 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
 
       // Check collisions
       let valid = true;
+      let idx = startY * width + startX;
+      const step = dir.y * width + dir.x;
+
       for (let i = 0; i < wordLen; i++) {
-        const x = startX + i * dir.x;
-        const y = startY + i * dir.y;
-        const cell = grid[y][x];
-        if (cell !== '' && cell !== cleanWord[i]) {
+        const cell = grid[idx];
+        const charCode = cleanWord.charCodeAt(i);
+        if (cell !== 0 && cell !== charCode) {
           valid = false;
           break;
         }
+        idx += step;
       }
 
       if (valid) {
         // Place it
+        let placementIdx = startY * width + startX;
         for (let i = 0; i < wordLen; i++) {
-          const x = startX + i * dir.x;
-          const y = startY + i * dir.y;
-          grid[y][x] = cleanWord[i];
+          grid[placementIdx] = cleanWord.charCodeAt(i);
+          placementIdx += step;
         }
         
         const location: WordLocation = {
@@ -171,14 +176,21 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
     placeWord(distractor, true);
   }
 
-  // 4. Fill empty spaces
+  // 4. Convert flat buffer to string[][] and fill empty spaces
+  const finalGrid: string[][] = new Array(height);
   for (let y = 0; y < height; y++) {
+    const row = new Array(width);
+    const yOffset = y * width;
     for (let x = 0; x < width; x++) {
-      if (grid[y][x] === '') {
-        grid[y][x] = ALPHABET[Math.floor(Math.random() * 26)];
+      const val = grid[yOffset + x];
+      if (val === 0) {
+        row[x] = ALPHABET[Math.floor(Math.random() * 26)];
+      } else {
+        row[x] = String.fromCharCode(val);
       }
     }
+    finalGrid[y] = row;
   }
 
-  return { grid, placedWords, distractors };
+  return { grid: finalGrid, placedWords, distractors };
 }

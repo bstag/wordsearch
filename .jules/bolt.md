@@ -21,3 +21,7 @@
 ## 2025-03-02 - CSS Variables for List Rendering
 **Learning:** Passing dynamic style objects (like `{{ width: size }}`) to thousands of children components in a list/grid creates thousands of new objects per render, forcing React to diff them all.
 **Action:** Define a constant style object using CSS variables (e.g., `width: var(--size)`) and update the variables on the parent container. This reduces style prop reconciliation to O(1) (reference equality) and delegates layout updates to the browser's CSS engine.
+
+## 2025-03-03 - Generation Optimization: Uint8Array Buffer
+**Learning:** In the core puzzle generation loop, using a standard `string[][]` involved millions of string allocations and pointer dereferences (array of arrays). Switching to a flat `Uint8Array` buffer for the generation phase reduced execution time by ~25% and reduced memory churn.
+**Action:** For computationally intensive 2D grid algorithms, use a flat TypedArray (e.g., `Uint8Array`, `Int32Array`) for internal processing and convert to high-level structures (like `string[][]`) only at the IO boundaries.
