@@ -424,21 +424,32 @@ export default function WordSearchBuilder() {
                 value={wordsRaw}
                 onChange={(e) => setWordsRaw(e.target.value)}
                 rows={10}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm"
+                aria-invalid={invalidWords.length > 0 || !isWordCountValid}
+                aria-describedby={[
+                  'wordlist-helper',
+                  invalidWords.length > 0 && 'wordlist-error',
+                  !isWordCountValid && 'wordlist-count-error',
+                ].filter(Boolean).join(' ')}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 font-mono text-sm ${
+                  invalidWords.length > 0 || !isWordCountValid
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                }`}
                 placeholder="Enter words separated by commas or newlines"
               />
-              <p className="text-xs text-gray-500">
-                {wordList.length} words
-              </p>
+              <div id="wordlist-helper" className="flex justify-between text-xs text-gray-500">
+                <span>{wordList.length}/100 words</span>
+                <span>{wordsRaw.length}/2500 chars</span>
+              </div>
               {invalidWords.length > 0 && (
-                <div role="alert" className="text-xs text-red-600 font-medium">
+                <div id="wordlist-error" role="alert" className="text-xs text-red-600 font-medium">
                   {invalidWords.length === 1
                     ? `"${invalidWords[0]}" is too long (max ${Math.min(20, Math.max(width, height))} chars; limited by ${Math.max(width, height) > 20 ? 'schema limit of 20 characters' : 'current grid size'}).`
                     : `${invalidWords.length} words are too long (max ${Math.min(20, Math.max(width, height))} chars; limited by ${Math.max(width, height) > 20 ? 'schema limit of 20 characters' : 'current grid size'}).`}
                 </div>
               )}
               {!isWordCountValid && (
-                <div role="alert" className="text-xs text-red-600 font-medium mt-1">
+                <div id="wordlist-count-error" role="alert" className="text-xs text-red-600 font-medium mt-1">
                   Too many words ({wordList.length}/100 max).
                 </div>
               )}
