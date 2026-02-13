@@ -425,7 +425,11 @@ export default function WordSearchBuilder() {
                 onChange={(e) => setWordsRaw(e.target.value)}
                 rows={10}
                 aria-invalid={invalidWords.length > 0 || !isWordCountValid}
-                aria-describedby="wordlist-helper wordlist-error wordlist-count-error"
+                aria-describedby={[
+                  'wordlist-helper',
+                  invalidWords.length > 0 && 'wordlist-error',
+                  !isWordCountValid && 'wordlist-count-error',
+                ].filter(Boolean).join(' ')}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 font-mono text-sm ${
                   invalidWords.length > 0 || !isWordCountValid
                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
