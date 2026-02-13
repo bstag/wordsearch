@@ -155,6 +155,9 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
     if (!sourceWord || sourceWord.length < 3) continue;
     
     const clean = sourceWord.toUpperCase().replace(/[^A-Z]/g, '');
+    // Ensure we have enough valid characters to process
+    if (clean.length < 3) continue;
+
     const charIndex = Math.floor(Math.random() * clean.length);
     const originalChar = clean[charIndex];
     

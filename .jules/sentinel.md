@@ -17,3 +17,8 @@
 **Vulnerability:** User interface validation was looser than backend schema validation, allowing users to submit configurations (e.g., words > 20 chars) that caused unhandled exceptions in the generator logic.
 **Learning:** Relying solely on `zod` schema validation in the logic layer is insufficient for UX; the UI must enforce the same (or stricter) constraints to prevent error states.
 **Prevention:** Mirror schema constraints (like max string length and array size) in the UI validation logic and disable submission if invalid.
+
+## 2025-02-18 - DoS via Unsanitized Input Length Check
+**Vulnerability:** The puzzle generator checked the length of raw input words (e.g. "123") before cleaning them (to ""), causing a crash when accessing the first character of the empty cleaned string during distractor generation.
+**Learning:** Validation checks (like minimum length) must be performed on the *transformed/cleaned* data that will actually be used, not just the raw input.
+**Prevention:** Always validate data *after* sanitization or transformation steps to ensure it meets the requirements of the downstream logic.
