@@ -118,10 +118,10 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
 
       if (valid) {
         // Place it
-        let idx = startY * width + startX;
+        let placementIdx = startY * width + startX;
         for (let i = 0; i < wordLen; i++) {
-          grid[idx] = cleanWord.charCodeAt(i);
-          idx += step;
+          grid[placementIdx] = cleanWord.charCodeAt(i);
+          placementIdx += step;
         }
         
         const location: WordLocation = {
