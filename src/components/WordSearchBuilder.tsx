@@ -6,7 +6,7 @@ import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
 import { getRandomDefaultWords } from '@/lib/wordPool';
 import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
 import { PlayablePuzzleGrid } from './PlayablePuzzleGrid';
-import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play, Dice5, ArrowLeft, Trophy, MousePointerClick } from 'lucide-react';
+import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play, Dice5, ArrowLeft, Trophy, MousePointerClick, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 
 // Security: Custom parsers to enforce limits on URL parameters
@@ -408,15 +408,27 @@ export default function WordSearchBuilder() {
                 <label htmlFor="wordlist" className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Type className="w-4 h-4" />
                   Word List
+                  <span className="text-xs font-normal text-gray-500 hidden sm:inline">(comma or newline separated)</span>
                 </label>
-                <button
-                  onClick={handleRandomizeWords}
-                  className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-800 transition-colors"
-                  title="Generate random words"
-                >
-                  <Dice5 className="w-3 h-3" />
-                  Randomize
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setWordsRaw('')}
+                    className="text-xs flex items-center gap-1 text-gray-500 hover:text-red-600 transition-colors"
+                    title="Clear word list"
+                    aria-label="Clear word list"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Clear
+                  </button>
+                  <button
+                    onClick={handleRandomizeWords}
+                    className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-800 transition-colors"
+                    title="Generate random words"
+                  >
+                    <Dice5 className="w-3 h-3" />
+                    Randomize
+                  </button>
+                </div>
               </div>
               <textarea
                 id="wordlist"
