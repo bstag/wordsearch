@@ -22,3 +22,13 @@
 **Vulnerability:** The puzzle generator checked the length of raw input words (e.g. "123") before cleaning them (to ""), causing a crash when accessing the first character of the empty cleaned string during distractor generation.
 **Learning:** Validation checks (like minimum length) must be performed on the *transformed/cleaned* data that will actually be used, not just the raw input.
 **Prevention:** Always validate data *after* sanitization or transformation steps to ensure it meets the requirements of the downstream logic.
+
+## 2025-02-18 - Input Validation for Generator Word List
+**Vulnerability:** The puzzle generator allowed words consisting entirely of non-alphabetic characters (e.g., "!!!"), which were sanitized to empty strings, resulting in "ghost" words in the puzzle grid.
+**Learning:** Sanitization logic (like stripping non-whitelist characters) can inadvertently result in invalid/empty data if the input isn't pre-validated against the whitelist.
+**Prevention:** Enforce whitelist characters in the input schema (e.g., using Zod regex ) to ensure data remains valid after sanitization.
+
+## 2025-02-18 - Input Validation for Generator Word List
+**Vulnerability:** The puzzle generator allowed words consisting entirely of non-alphabetic characters (e.g., "!!!"), which were sanitized to empty strings, resulting in "ghost" words in the puzzle grid.
+**Learning:** Sanitization logic (like stripping non-whitelist characters) can inadvertently result in invalid/empty data if the input isn't pre-validated against the whitelist.
+**Prevention:** Enforce whitelist characters in the input schema (e.g., using Zod regex `/[A-Za-z]/`) to ensure data remains valid after sanitization.
