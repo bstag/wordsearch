@@ -148,48 +148,31 @@ export const PlayablePuzzleGrid = ({
     }
   };
 
-  // Helper to determine if a cell is part of the current selection line
-  const isCellSelected = (x: number, y: number) => {
-    if (!selectionStart || !selectionEnd) return false;
+  // ⚡ Performance: Memoize selection set to avoid O(W*H) math checks per frame.
+  // Instead of calculating line geometry for every cell, we pre-calculate valid indices once per move.
+  const selectedIndices = useMemo(() => {
+    const indices = new Set<number>();
+    if (!selectionStart || !selectionEnd) return indices;
 
+    const width = grid[0]?.length || 0;
     const dx = selectionEnd.x - selectionStart.x;
     const dy = selectionEnd.y - selectionStart.y;
 
     // Must be horizontal, vertical, or diagonal
-    if (dx !== 0 && dy !== 0 && Math.abs(dx) !== Math.abs(dy)) return false;
+    if (dx !== 0 && dy !== 0 && Math.abs(dx) !== Math.abs(dy)) return indices;
 
     const steps = Math.max(Math.abs(dx), Math.abs(dy));
-    if (steps === 0) return x === selectionStart.x && y === selectionStart.y;
+    const stepX = steps === 0 ? 0 : dx / steps;
+    const stepY = steps === 0 ? 0 : dy / steps;
 
-    const stepX = dx / steps;
-    const stepY = dy / steps;
-
-    // Check if point (x,y) is on the segment
-    // It must satisfy: x = start.x + k * stepX, y = start.y + k * stepY, for 0 <= k <= steps
-    
-    // Find k based on x (if stepX != 0) or y (if stepY != 0)
-    let k;
-    if (Math.abs(stepX) > 0) {
-      k = (x - selectionStart.x) / stepX;
-    } else {
-      k = (y - selectionStart.y) / stepY;
+    for (let i = 0; i <= steps; i++) {
+      const x = selectionStart.x + (i * stepX);
+      const y = selectionStart.y + (i * stepY);
+      indices.add(Math.round(y) * width + Math.round(x));
     }
 
-    // Check if k is integer (or close enough) and within range
-    if (Math.abs(k - Math.round(k)) > 0.001) return false;
-    k = Math.round(k);
-    
-    if (k < 0 || k > steps) return false;
-
-    // Verify the other coordinate matches
-    if (Math.abs(stepX) > 0) {
-      // Verified x above, check y
-      return Math.abs(y - (selectionStart.y + k * stepY)) < 0.001;
-    } else {
-      // Verified y above, check x
-      return Math.abs(x - (selectionStart.x + k * stepX)) < 0.001;
-    }
-  };
+    return indices;
+  }, [selectionStart, selectionEnd, grid]);
 
   // Prevent scrolling when touching the grid
   useEffect(() => {
@@ -221,9 +204,10 @@ export const PlayablePuzzleGrid = ({
       onTouchMove={handleMove}
       onTouchEnd={handleEnd}
     >
-      {grid.map((row, y) => (
-        row.map((cell, x) => {
-          const selected = isCellSelected(x, y);
+      {grid.map((row, y) => {
+        const rowOffset = y * (grid[0]?.length || 0);
+        return row.map((cell, x) => {
+          const selected = selectedIndices.has(rowOffset + x);
           const foundColor = foundColorsGrid[y][x];
           
           return (
@@ -245,8 +229,8 @@ export const PlayablePuzzleGrid = ({
               {cell}
             </div>
           );
-        })
-      ))}
+        });
+      })}
     </div>
   );
 };
