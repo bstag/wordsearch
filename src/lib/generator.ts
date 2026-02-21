@@ -5,7 +5,7 @@ export type Direction = 'horizontal' | 'vertical' | 'diagonal' | 'reverse';
 export const GeneratorConfigSchema = z.object({
   width: z.number().int().min(5).max(50),
   height: z.number().int().min(5).max(50),
-  words: z.array(z.string().min(1).max(20)).min(1).max(100),
+  words: z.array(z.string().min(1).max(20).regex(/[A-Za-z]/, "Must contain at least one letter")).min(1).max(100),
   allowBackwards: z.boolean(),
   allowDiagonals: z.boolean(),
   difficulty: z.number().int().min(0).max(10)
@@ -149,6 +149,7 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   // 2. Place real words
   sortedWords.forEach(word => {
     const clean = word.toUpperCase().replace(/[^A-Z]/g, '');
+    if (clean.length === 0) return; // Skip empty words
     placeWord(clean, false);
   });
 
