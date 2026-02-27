@@ -93,6 +93,13 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
 
     if (validConfigs.length === 0) return false;
 
+    // ⚡ Performance: Convert string to Uint8Array once, outside the loop.
+    // This avoids calling charCodeAt() repeated times inside the retry loop.
+    const wordCodes = new Uint8Array(wordLen);
+    for (let i = 0; i < wordLen; i++) {
+      wordCodes[i] = cleanWord.charCodeAt(i);
+    }
+
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       // Pick a random valid direction configuration
       const config = validConfigs[Math.floor(Math.random() * validConfigs.length)];
@@ -108,7 +115,7 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
 
       for (let i = 0; i < wordLen; i++) {
         const cell = grid[idx];
-        const charCode = cleanWord.charCodeAt(i);
+        const charCode = wordCodes[i];
         if (cell !== 0 && cell !== charCode) {
           valid = false;
           break;
@@ -120,7 +127,7 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
         // Place it
         let placementIdx = startY * width + startX;
         for (let i = 0; i < wordLen; i++) {
-          grid[placementIdx] = cleanWord.charCodeAt(i);
+          grid[placementIdx] = wordCodes[i];
           placementIdx += step;
         }
         
@@ -143,38 +150,44 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
     return false;
   };
 
-  // 1. Sort words by length (longest first)
-  const sortedWords = [...words].sort((a, b) => b.length - a.length);
+  // 1. Pre-process words (clean, uppercase, sort)
+  // ⚡ Performance: Clean and uppercase all words once at the start.
+  // This avoids repetitive regex and string operations during placement and distractor generation.
+  const cleanWords = words
+    .map(w => w.toUpperCase().replace(/[^A-Z]/g, ''))
+    .filter(w => w.length > 0);
+
+  // Sort by length (longest first) for better packing
+  const sortedWords = [...cleanWords].sort((a, b) => b.length - a.length);
 
   // 2. Place real words
-  sortedWords.forEach(word => {
-    const clean = word.toUpperCase().replace(/[^A-Z]/g, '');
-    if (clean.length === 0) return; // Skip empty words
+  sortedWords.forEach(clean => {
     placeWord(clean, false);
   });
 
   // 3. Generate and place distractors
   const distractorCount = Math.ceil(words.length * (difficulty / 3));
 
-  for (let i = 0; i < distractorCount; i++) {
-    const sourceWord = words[Math.floor(Math.random() * words.length)];
-    if (!sourceWord || sourceWord.length < 3) continue;
-    
-    const clean = sourceWord.toUpperCase().replace(/[^A-Z]/g, '');
-    // Ensure we have enough valid characters to process
-    if (clean.length < 3) continue;
+  // ⚡ Performance: Filter candidates once
+  const distractorCandidates = cleanWords.filter(w => w.length >= 3);
 
-    const charIndex = Math.floor(Math.random() * clean.length);
-    const originalChar = clean[charIndex];
-    
-    // Pick a random char that is NOT the original char
-    const originalCharCode = originalChar.charCodeAt(0) - 65;
-    const offset = Math.floor(Math.random() * 25) + 1; // 1 to 25
-    const newCharCode = (originalCharCode + offset) % 26;
-    const newChar = ALPHABET[newCharCode];
-    
-    const distractor = clean.substring(0, charIndex) + newChar + clean.substring(charIndex + 1);
-    placeWord(distractor, true);
+  if (distractorCandidates.length > 0) {
+    for (let i = 0; i < distractorCount; i++) {
+      // Pick random source from pre-cleaned candidates
+      const clean = distractorCandidates[Math.floor(Math.random() * distractorCandidates.length)];
+
+      const charIndex = Math.floor(Math.random() * clean.length);
+      const originalChar = clean[charIndex];
+
+      // Pick a random char that is NOT the original char
+      const originalCharCode = originalChar.charCodeAt(0) - 65;
+      const offset = Math.floor(Math.random() * 25) + 1; // 1 to 25
+      const newCharCode = (originalCharCode + offset) % 26;
+      const newChar = ALPHABET[newCharCode];
+
+      const distractor = clean.substring(0, charIndex) + newChar + clean.substring(charIndex + 1);
+      placeWord(distractor, true);
+    }
   }
 
   // 4. Convert flat buffer to string[][] and fill empty spaces
