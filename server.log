@@ -1,0 +1,50 @@
+npm warn exec The following package was not found and will be installed: serve@14.2.5
+ INFO  Accepting connections at http://localhost:3000
+ HTTP  2/27/2026 1:52:06 PM ::1 GET /
+ HTTP  2/27/2026 1:52:06 PM ::1 Returned 200 in 300 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/media/797e433ab948586e-s.p.dbea232f.woff2
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/media/caa3a2e1cccd8315-s.p.853070df.woff2
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 4 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 4 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/b2b61f8d609ede72.css
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 5 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/1524212c35e4fc41.js
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/ffd00f83382900e5.js
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/8703f952316b88ec.js
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/e4c8e8049448b982.js
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/turbopack-c40e41fbb38ea9d0.js
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/220fdd38733dba01.js
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 8 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 7 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 8 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 8 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 8 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 17 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/be72aad2f41f746f.js
+ HTTP  2/27/2026 1:52:07 PM ::1 GET /_next/static/chunks/28460beeb0ba5736.js
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 6 ms
+ HTTP  2/27/2026 1:52:07 PM ::1 Returned 200 in 10 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 1 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/media/797e433ab948586e-s.p.dbea232f.woff2
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 0 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/b2b61f8d609ede72.css
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/media/caa3a2e1cccd8315-s.p.853070df.woff2
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 2 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 3 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/1524212c35e4fc41.js
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 2 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/ffd00f83382900e5.js
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/turbopack-c40e41fbb38ea9d0.js
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 2 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 1 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/8703f952316b88ec.js
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 2 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/220fdd38733dba01.js
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/e4c8e8049448b982.js
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 1 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 2 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/be72aad2f41f746f.js
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 0 ms
+ HTTP  2/27/2026 1:52:24 PM ::1 GET /_next/static/chunks/28460beeb0ba5736.js
+ HTTP  2/27/2026 1:52:24 PM ::1 Returned 200 in 2 ms
