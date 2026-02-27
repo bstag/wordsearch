@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useQueryState, parseAsBoolean, parseAsInteger, parseAsString, createParser } from 'nuqs';
 import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
 import { getRandomDefaultWords } from '@/lib/wordPool';
@@ -48,6 +48,8 @@ export default function WordSearchBuilder() {
   const [difficulty, setDifficulty] = useQueryState('difficulty', createBoundedIntegerParser(0, 10).withDefault(5));
 
   const [runMode, setRunMode] = useQueryState('run', parseAsBoolean.withDefault(false));
+
+  const focusOnReturnRef = useRef(false);
 
   // Initialize random words if empty
   useEffect(() => {
@@ -478,6 +480,12 @@ export default function WordSearchBuilder() {
                 {isGenerating ? 'Generating...' : 'Regenerate Puzzle'}
               </button>
               <button
+                ref={(el) => {
+                  if (el && focusOnReturnRef.current) {
+                    el.focus();
+                    focusOnReturnRef.current = false;
+                  }
+                }}
                 onClick={() => setRunMode(true)}
                 className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
@@ -548,7 +556,11 @@ export default function WordSearchBuilder() {
               {runMode && (
                 <div className="mb-4 flex justify-center print:hidden">
                   <button
-                    onClick={() => setRunMode(false)}
+                    autoFocus
+                    onClick={() => {
+                      focusOnReturnRef.current = true;
+                      setRunMode(false);
+                    }}
                     className="flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors"
                   >
                     <ArrowLeft className="w-4 h-4 mr-1.5" />
