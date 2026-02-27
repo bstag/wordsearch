@@ -1,3 +1,5 @@
+import { secureRandomInt, shuffleArray } from './secureRandom';
+
 export const WORD_POOL = [
   // Animals
   "LION", "TIGER", "BEAR", "ELEPHANT", "GIRAFFE", "ZEBRA", "MONKEY", "PANDA", "KOALA", "KANGAROO",
@@ -83,7 +85,7 @@ export const WORD_POOL = [
 ];
 
 export function getRandomDefaultWords(min = 8, max = 15): string {
-  const count = Math.floor(Math.random() * (max - min + 1)) + min;
-  const shuffled = [...WORD_POOL].sort(() => 0.5 - Math.random());
+  const count = secureRandomInt(min, max + 1);
+  const shuffled = shuffleArray([...WORD_POOL]);
   return shuffled.slice(0, count).join(',');
 }

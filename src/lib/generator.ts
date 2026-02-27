@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { secureRandomInt, pickRandom } from './secureRandom';
 
 export type Direction = 'horizontal' | 'vertical' | 'diagonal' | 'reverse';
 
@@ -95,11 +96,14 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       // Pick a random valid direction configuration
-      const config = validConfigs[Math.floor(Math.random() * validConfigs.length)];
+      const config = pickRandom(validConfigs);
+      // Fallback if random fails (shouldn't happen with non-empty array)
+      if (!config) continue;
+
       const { dir, minX, maxX, minY, maxY } = config;
 
-      const startX = Math.floor(Math.random() * (maxX - minX)) + minX;
-      const startY = Math.floor(Math.random() * (maxY - minY)) + minY;
+      const startX = secureRandomInt(minX, maxX);
+      const startY = secureRandomInt(minY, maxY);
 
       // Check collisions
       let valid = true;
@@ -157,19 +161,19 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   const distractorCount = Math.ceil(words.length * (difficulty / 3));
 
   for (let i = 0; i < distractorCount; i++) {
-    const sourceWord = words[Math.floor(Math.random() * words.length)];
+    const sourceWord = pickRandom(words);
     if (!sourceWord || sourceWord.length < 3) continue;
     
     const clean = sourceWord.toUpperCase().replace(/[^A-Z]/g, '');
     // Ensure we have enough valid characters to process
     if (clean.length < 3) continue;
 
-    const charIndex = Math.floor(Math.random() * clean.length);
+    const charIndex = secureRandomInt(0, clean.length);
     const originalChar = clean[charIndex];
     
     // Pick a random char that is NOT the original char
     const originalCharCode = originalChar.charCodeAt(0) - 65;
-    const offset = Math.floor(Math.random() * 25) + 1; // 1 to 25
+    const offset = secureRandomInt(1, 26); // 1 to 25
     const newCharCode = (originalCharCode + offset) % 26;
     const newChar = ALPHABET[newCharCode];
     
@@ -185,7 +189,7 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
     for (let x = 0; x < width; x++) {
       const val = grid[yOffset + x];
       if (val === 0) {
-        row[x] = ALPHABET[Math.floor(Math.random() * 26)];
+        row[x] = ALPHABET[secureRandomInt(0, 26)];
       } else {
         row[x] = String.fromCharCode(val);
       }
