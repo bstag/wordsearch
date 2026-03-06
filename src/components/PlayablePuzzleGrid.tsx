@@ -63,11 +63,19 @@ export const PlayablePuzzleGrid = ({
   const getCellCoords = (e: React.MouseEvent | React.TouchEvent): Point | null => {
     if (!gridRef.current) return null;
     
-    // Handle touch events
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    let element: Element | null = null;
 
-    const element = document.elementFromPoint(clientX, clientY);
+    // ⚡ Performance: Mouse events can use `e.target` directly, which is O(1).
+    // Touch events on `touchmove` always target the original element touched,
+    // so they still require the more expensive `document.elementFromPoint`.
+    if ('touches' in e) {
+      const clientX = e.touches[0].clientX;
+      const clientY = e.touches[0].clientY;
+      element = document.elementFromPoint(clientX, clientY);
+    } else {
+      element = e.target as Element;
+    }
+
     if (!element) return null;
 
     const cell = element.closest('[data-cell-x]');
@@ -99,7 +107,15 @@ export const PlayablePuzzleGrid = ({
     
     const coords = getCellCoords(e);
     if (coords) {
-      setSelectionEnd(coords);
+      // ⚡ Performance: Use functional state update to bail out of re-renders
+      // if the user is dragging within the same cell. React will skip rendering
+      // if we return the identical object reference (`prev`).
+      setSelectionEnd(prev => {
+        if (prev && prev.x === coords.x && prev.y === coords.y) {
+          return prev;
+        }
+        return coords;
+      });
     }
   };
 
