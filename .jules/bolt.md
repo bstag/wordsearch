@@ -25,3 +25,7 @@
 ## 2025-03-03 - Generation Optimization: Uint8Array Buffer
 **Learning:** In the core puzzle generation loop, using a standard `string[][]` involved millions of string allocations and pointer dereferences (array of arrays). Switching to a flat `Uint8Array` buffer for the generation phase reduced execution time by ~25% and reduced memory churn.
 **Action:** For computationally intensive 2D grid algorithms, use a flat TypedArray (e.g., `Uint8Array`, `Int32Array`) for internal processing and convert to high-level structures (like `string[][]`) only at the IO boundaries.
+
+## 2025-03-05 - Event Handling and State Re-renders
+**Learning:** During continuous event listening like drag selection (`touchmove`, `mousemove`), indiscriminately using `document.elementFromPoint` forces expensive synchronous layout checks for every pixel moved. Furthermore, returning a new object reference `{x, y}` from the coordinate parser to a React state updater defeats React's state bail-out optimization (even if the values are logically equal, causing re-renders of the entire 900+ cell grid).
+**Action:** When mapping continuous events to a grid structure, use `e.target` directly for mouse events when possible to bypass the hit-test layout calculation. Always pass a functional state updater `setCoord(prev => ...)` to state hooks, checking if the values changed, and return the `prev` identical object reference to allow React to bypass the expensive render cycle completely while hovering in the same cell.
