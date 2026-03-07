@@ -28,7 +28,10 @@ export default function Home() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // Security Enhancement: Safely escape the JSON-LD string to prevent XSS attacks
+        // if user input (e.g., puzzle title) is ever added to the jsonLd object.
+        // JSON.stringify alone is not safe if the string contains </script>.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
         <WordSearchBuilder />
