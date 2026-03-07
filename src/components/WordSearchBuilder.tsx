@@ -472,9 +472,16 @@ export default function WordSearchBuilder() {
             {/* Actions */}
             <div className="pt-4 space-y-3">
               <button
-                onClick={generate}
-                disabled={isGenerating || invalidWords.length > 0 || !isWordCountValid}
-                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(isGenerating || invalidWords.length > 0 || !isWordCountValid) ? 'opacity-75 cursor-not-allowed' : ''}`}
+                onClick={(e) => {
+                  if (isGenerating || invalidWords.length > 0 || !isWordCountValid) {
+                    e.preventDefault();
+                    return;
+                  }
+                  generate();
+                }}
+                aria-disabled={isGenerating || invalidWords.length > 0 || !isWordCountValid}
+                title={invalidWords.length > 0 ? "Please fix invalid words before generating" : !isWordCountValid ? "Please fix word count before generating" : isGenerating ? "Generating..." : "Regenerate Puzzle"}
+                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(isGenerating || invalidWords.length > 0 || !isWordCountValid) ? 'bg-indigo-600 opacity-75 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
                 {isGenerating ? 'Generating...' : 'Regenerate Puzzle'}
@@ -501,6 +508,7 @@ export default function WordSearchBuilder() {
               </button>
               <button
                 onClick={handleShare}
+                aria-live="polite"
                 className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 {isCopied ? (
@@ -520,6 +528,7 @@ export default function WordSearchBuilder() {
                 >
                   <Github className="w-4 h-4 mr-1.5" />
                   View on GitHub
+                  <span className="sr-only"> (opens in a new tab)</span>
                 </a>
               </div>
             </div>
