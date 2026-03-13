@@ -15,7 +15,35 @@ interface Point {
   y: number;
 }
 
-export const PlayablePuzzleGrid = ({
+interface CellProps {
+  x: number;
+  y: number;
+  char: string;
+  selected: boolean;
+  foundColor: string;
+}
+
+const Cell = React.memo(({ x, y, char, selected, foundColor }: CellProps) => (
+  <div
+    data-cell-x={x}
+    data-cell-y={y}
+    className={`
+      aspect-square w-full
+      flex items-center justify-center
+      text-[clamp(0.7rem,4vw,1.5rem)] font-bold uppercase
+      border border-gray-200
+      transition-colors duration-150
+      ${selected ? 'bg-indigo-500 text-white transform scale-105 z-10 shadow-sm' : ''}
+      ${!selected && foundColor ? foundColor : ''}
+      ${!selected && !foundColor ? 'hover:bg-gray-50' : ''}
+    `}
+  >
+    {char}
+  </div>
+));
+Cell.displayName = 'Cell';
+
+export const PlayablePuzzleGrid = React.memo(({
   grid,
   placedWords,
   foundWords,
@@ -164,13 +192,13 @@ export const PlayablePuzzleGrid = ({
     }
   };
 
-  // ⚡ Performance: Memoize selection set to avoid O(W*H) math checks per frame.
-  // Instead of calculating line geometry for every cell, we pre-calculate valid indices once per move.
+  // ⚡ Performance: Memoize selection to avoid O(W*H) math checks per frame.
+  // We use Uint8Array instead of Set for O(1) memory-contiguous lookups during the render loop.
   const selectedIndices = useMemo(() => {
-    const indices = new Set<number>();
+    const width = grid[0]?.length || 0;
+    const indices = new Uint8Array(grid.length * width);
     if (!selectionStart || !selectionEnd) return indices;
 
-    const width = grid[0]?.length || 0;
     const dx = selectionEnd.x - selectionStart.x;
     const dy = selectionEnd.y - selectionStart.y;
 
@@ -184,7 +212,7 @@ export const PlayablePuzzleGrid = ({
     for (let i = 0; i <= steps; i++) {
       const x = selectionStart.x + (i * stepX);
       const y = selectionStart.y + (i * stepY);
-      indices.add(Math.round(y) * width + Math.round(x));
+      indices[Math.round(y) * width + Math.round(x)] = 1;
     }
 
     return indices;
@@ -223,30 +251,22 @@ export const PlayablePuzzleGrid = ({
       {grid.map((row, y) => {
         const rowOffset = y * (grid[0]?.length || 0);
         return row.map((cell, x) => {
-          const selected = selectedIndices.has(rowOffset + x);
+          const selected = selectedIndices[rowOffset + x] === 1;
           const foundColor = foundColorsGrid[y][x];
           
           return (
-            <div
+            <Cell
               key={`${x}-${y}`}
-              data-cell-x={x}
-              data-cell-y={y}
-              className={`
-                aspect-square w-full
-                flex items-center justify-center 
-                text-[clamp(0.7rem,4vw,1.5rem)] font-bold uppercase
-                border border-gray-200
-                transition-colors duration-150
-                ${selected ? 'bg-indigo-500 text-white transform scale-105 z-10 shadow-sm' : ''}
-                ${!selected && foundColor ? foundColor : ''}
-                ${!selected && !foundColor ? 'hover:bg-gray-50' : ''}
-              `}
-            >
-              {cell}
-            </div>
+              x={x}
+              y={y}
+              char={cell}
+              selected={selected}
+              foundColor={foundColor}
+            />
           );
         });
       })}
     </div>
   );
-};
+});
+PlayablePuzzleGrid.displayName = 'PlayablePuzzleGrid';
