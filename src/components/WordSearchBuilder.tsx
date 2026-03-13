@@ -609,7 +609,7 @@ export default function WordSearchBuilder() {
               )}
 
               <div className="print:hidden flex justify-center mt-2">
-                {!runMode && (
+                {puzzle && !runMode && (
                 <button
                   onClick={() => setShowSolution(!showSolution)}
                   className="flex items-center text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
@@ -625,97 +625,114 @@ export default function WordSearchBuilder() {
             </div>
 
             {/* Grid */}
-            {puzzle && (
-              <div className="flex justify-center mb-6 md:mb-10" style={{ marginBottom: 'var(--print-title-margin)' }}>
-                {runMode ? (
-                  <PlayablePuzzleGrid
-                    grid={puzzle.grid}
-                    placedWords={puzzle.placedWords}
-                    foundWords={foundWords}
-                    onWordFound={handleWordFound}
-                  />
-                ) : (
-                  <PuzzleGrid
-                    grid={puzzle.grid}
-                    showGridLines={showGridLines}
-                    printCellSize={printCellSize}
-                    printFontSize={printFontSize}
-                    solutionGrid={solutionGrid}
-                    highlightSolution={showSolution}
-                  />
-                )}
-              </div>
-            )}
-
-            {/* Word Bank */}
-            <div className="mt-8" style={{ marginTop: 'var(--print-title-margin)' }}>
-              <h2 className="text-lg font-semibold mb-4 border-b border-gray-300 pb-2 print:text-black">Word Bank</h2>
-              
-              {isOverflowing && (
-                <div role="alert" className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-sm print:hidden flex items-start">
-                  <span className="font-bold mr-1">Warning:</span> 
-                  This puzzle may be too tall to fit on a single printed page. Try reducing the grid height or the number of words.
+            {puzzle ? (
+              <>
+                <div className="flex justify-center mb-6 md:mb-10" style={{ marginBottom: 'var(--print-title-margin)' }}>
+                  {runMode ? (
+                    <PlayablePuzzleGrid
+                      grid={puzzle.grid}
+                      placedWords={puzzle.placedWords}
+                      foundWords={foundWords}
+                      onWordFound={handleWordFound}
+                    />
+                  ) : (
+                    <PuzzleGrid
+                      grid={puzzle.grid}
+                      showGridLines={showGridLines}
+                      printCellSize={printCellSize}
+                      printFontSize={printFontSize}
+                      solutionGrid={solutionGrid}
+                      highlightSolution={showSolution}
+                    />
+                  )}
                 </div>
-              )}
 
-              <ul className="grid grid-cols-2 md:grid-cols-4 gap-2 print:grid-cols-4">
-                {puzzle?.placedWords.map((item, idx) => (
-                  <li 
-                    key={idx} 
-                    className={`flex items-center text-sm md:text-base print:text-black transition-colors ${runMode && foundWords.has(item.word) ? 'line-through text-gray-400 decoration-gray-400' : ''}`}
-                    style={{ fontSize: 'var(--print-wordbank-size)' }}
-                  >
-                    <span
-                      className={`inline-flex items-center justify-center border mr-2 flex-shrink-0 ${runMode && foundWords.has(item.word) ? 'border-green-500 bg-green-50' : 'border-gray-400'}`}
-                      style={{ width: '1em', height: '1em' }}
-                      aria-hidden="true"
-                    >
-                      {runMode && foundWords.has(item.word) && (
-                        <Check className="text-green-600" style={{ width: '80%', height: '80%' }} strokeWidth={3} />
-                      )}
-                    </span>
-                    <span>
-                      {item.word}
-                      {runMode && foundWords.has(item.word) && <span className="sr-only"> (Found)</span>}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              {puzzle?.placedWords.length !== wordsRaw.split(/[\n,]+/).filter(w => w.trim().length > 0).length && (
-                 <div role="alert" className="mt-4 text-red-500 text-sm print:hidden">
-                   Warning: Some words could not be placed due to space constraints. Try increasing the grid size.
-                 </div>
-              )}
-            </div>
+                {/* Word Bank */}
+                <div className="mt-8" style={{ marginTop: 'var(--print-title-margin)' }}>
+                  <h2 className="text-lg font-semibold mb-4 border-b border-gray-300 pb-2 print:text-black">Word Bank</h2>
 
-            {/* Footer for Print */}
-            <div className="hidden print:block mt-12 text-center text-xs text-gray-400" style={{ marginTop: 'var(--print-title-margin)' }}>
-              Generated by WsGen - Developed by StagWare
-            </div>
+                  {isOverflowing && (
+                    <div role="alert" className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-sm print:hidden flex items-start">
+                      <span className="font-bold mr-1">Warning:</span>
+                      This puzzle may be too tall to fit on a single printed page. Try reducing the grid height or the number of words.
+                    </div>
+                  )}
 
-            {/* Answer Key Page */}
-            {showAnswerKey && puzzle && (
-              <div className="hidden print:block break-before-page mt-8">
-                <div className="mb-8 text-center">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider">Answer Key</h1>
-                  <div className="text-sm text-gray-500 mt-2">
-                    {title}
+                  <ul className="grid grid-cols-2 md:grid-cols-4 gap-2 print:grid-cols-4">
+                    {puzzle.placedWords.map((item, idx) => (
+                      <li
+                        key={idx}
+                        className={`flex items-center text-sm md:text-base print:text-black transition-colors ${runMode && foundWords.has(item.word) ? 'line-through text-gray-400 decoration-gray-400' : ''}`}
+                        style={{ fontSize: 'var(--print-wordbank-size)' }}
+                      >
+                        <span
+                          className={`inline-flex items-center justify-center border mr-2 flex-shrink-0 ${runMode && foundWords.has(item.word) ? 'border-green-500 bg-green-50' : 'border-gray-400'}`}
+                          style={{ width: '1em', height: '1em' }}
+                          aria-hidden="true"
+                        >
+                          {runMode && foundWords.has(item.word) && (
+                            <Check className="text-green-600" style={{ width: '80%', height: '80%' }} strokeWidth={3} />
+                          )}
+                        </span>
+                        <span>
+                          {item.word}
+                          {runMode && foundWords.has(item.word) && <span className="sr-only"> (Found)</span>}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {puzzle.placedWords.length !== wordsRaw.split(/[\n,]+/).filter(w => w.trim().length > 0).length && (
+                    <div role="alert" className="mt-4 text-red-500 text-sm print:hidden">
+                      Warning: Some words could not be placed due to space constraints. Try increasing the grid size.
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer for Print */}
+                <div className="hidden print:block mt-12 text-center text-xs text-gray-400" style={{ marginTop: 'var(--print-title-margin)' }}>
+                  Generated by WsGen - Developed by StagWare
+                </div>
+
+                {/* Answer Key Page */}
+                {showAnswerKey && (
+                  <div className="hidden print:block break-before-page mt-8">
+                    <div className="mb-8 text-center">
+                      <h1 className="text-3xl font-bold text-gray-900 mb-2 uppercase tracking-wider">Answer Key</h1>
+                      <div className="text-sm text-gray-500 mt-2">
+                        {title}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center mb-10">
+                      <AnswerKeyGrid
+                        grid={puzzle.grid}
+                        showGridLines={showGridLines}
+                        printCellSize={printCellSize}
+                        printFontSize={printFontSize}
+                        solutionGrid={solutionGrid}
+                      />
+                    </div>
+
+                    <div className="text-center text-xs text-gray-400">
+                      Answer Key for {title}
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex justify-center mb-10">
-                  <AnswerKeyGrid
-                    grid={puzzle.grid}
-                    showGridLines={showGridLines}
-                    printCellSize={printCellSize}
-                    printFontSize={printFontSize}
-                    solutionGrid={solutionGrid}
-                  />
-                </div>
-                
-                <div className="text-center text-xs text-gray-400">
-                   Answer Key for {title}
-                </div>
+                )}
+              </>
+            ) : !error && !isGenerating && (
+              <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 print:hidden mt-8 text-center p-6">
+                <Type className="w-12 h-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-1">No words added yet</h3>
+                <p className="text-sm text-gray-500 mb-4 max-w-sm">
+                  Add some words in the configuration panel on the left to generate your puzzle, or start with a random set.
+                </p>
+                <button
+                  onClick={handleRandomizeWords}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                >
+                  <Dice5 className="w-4 h-4 mr-2" />
+                  Use Random Words
+                </button>
               </div>
             )}
           </div>
