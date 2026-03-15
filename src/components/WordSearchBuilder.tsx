@@ -56,6 +56,7 @@ export default function WordSearchBuilder() {
     if (!wordsRaw || wordsRaw === 'LION,TIGER,BEAR') {
       setWordsRaw(getRandomDefaultWords());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount (or when wordsRaw is initially checked, but we want to avoid loops)
 
   // Internal state for the generated puzzle
@@ -112,13 +113,13 @@ export default function WordSearchBuilder() {
     }
   };
 
-  const handleWordFound = (word: string) => {
+  const handleWordFound = useCallback((word: string) => {
     setFoundWords(prev => {
       const newSet = new Set(prev);
       newSet.add(word);
       return newSet;
     });
-  };
+  }, []);
 
   const generate = useCallback(() => {
     // If no words, don't try to generate (avoids ZodError)
