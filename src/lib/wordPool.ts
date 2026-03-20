@@ -84,6 +84,20 @@ export const WORD_POOL = [
 
 export function getRandomDefaultWords(min = 8, max = 15): string {
   const count = Math.floor(Math.random() * (max - min + 1)) + min;
-  const shuffled = [...WORD_POOL].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count).join(',');
+  // ⚡ Performance: Use O(K) partial Fisher-Yates shuffle instead of O(N log N) full sort.
+  // This avoids sorting the entire 150+ word pool just to pick a few items,
+  // reducing execution time and producing a mathematically uniform random distribution
+  // (unlike `sort(() => 0.5 - Math.random())` which is biased in V8).
+  const pool = [...WORD_POOL];
+  const result: string[] = [];
+
+  for (let i = 0; i < count && pool.length > 0; i++) {
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    result.push(pool[randomIndex]);
+    // Swap with last element and pop (O(1) removal)
+    pool[randomIndex] = pool[pool.length - 1];
+    pool.pop();
+  }
+
+  return result.join(',');
 }
