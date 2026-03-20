@@ -494,23 +494,47 @@ export default function WordSearchBuilder() {
                     focusOnReturnRef.current = false;
                   }
                 }}
-                onClick={() => setRunMode(true)}
-                className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                onClick={(e) => {
+                  if (!puzzle || invalidWords.length > 0 || !isWordCountValid) {
+                    e.preventDefault();
+                    return;
+                  }
+                  setRunMode(true);
+                }}
+                aria-disabled={!puzzle || invalidWords.length > 0 || !isWordCountValid}
+                title={invalidWords.length > 0 ? "Fix invalid words to play" : !isWordCountValid ? "Fix word count to play" : !puzzle ? "Generate a puzzle to play" : "Play Online"}
+                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${(!puzzle || invalidWords.length > 0 || !isWordCountValid) ? 'bg-green-600 opacity-75 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
               >
                 <Play className="w-4 h-4 mr-2" />
                 Play Online
               </button>
               <button
-                onClick={() => window.print()}
-                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                onClick={(e) => {
+                  if (!puzzle || invalidWords.length > 0 || !isWordCountValid) {
+                    e.preventDefault();
+                    return;
+                  }
+                  window.print();
+                }}
+                aria-disabled={!puzzle || invalidWords.length > 0 || !isWordCountValid}
+                title={invalidWords.length > 0 ? "Fix invalid words to print" : !isWordCountValid ? "Fix word count to print" : !puzzle ? "Generate a puzzle to print" : "Print Puzzle"}
+                className={`w-full flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(!puzzle || invalidWords.length > 0 || !isWordCountValid) ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}
               >
                 <Printer className="w-4 h-4 mr-2" />
                 Print Puzzle
               </button>
               <button
-                onClick={handleShare}
+                onClick={(e) => {
+                  if (invalidWords.length > 0 || !isWordCountValid) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleShare();
+                }}
                 aria-live="polite"
-                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                aria-disabled={invalidWords.length > 0 || !isWordCountValid}
+                title={invalidWords.length > 0 ? "Fix invalid words to share" : !isWordCountValid ? "Fix word count to share" : "Share Configuration"}
+                className={`w-full flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(invalidWords.length > 0 || !isWordCountValid) ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}
               >
                 {isCopied ? (
                   <Check className="w-4 h-4 mr-2 text-green-600" />
