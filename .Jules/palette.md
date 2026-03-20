@@ -9,3 +9,6 @@
 ## 2024-05-18 - Added Empty State for Missing Puzzle
 **Learning:** Empty states replacing broken or incomplete UI components are critical for user guidance. In `WordSearchBuilder.tsx`, the Word Bank was previously rendering empty structural elements when no words had been added yet, which feels unpolished.
 **Action:** Always wrap conditionally required main content in a conditional block, and provide an explicit empty state component (with an icon and call-to-action) to help users understand what is missing and how to fix it immediately.
+## 2024-03-20 - Action Button Accessibility with aria-disabled
+**Learning:** Using the native `disabled` attribute on complex action buttons (like Play or Print) removes them from the tab sequence, preventing keyboard and screen reader users from discovering the button or understanding why it is unavailable (e.g., "Fix invalid words to play").
+**Action:** For interactive buttons that require specific conditions to be met, use `aria-disabled="true"` combined with an early return in the `onClick` handler, and provide a descriptive `title` (or tooltip) explaining the exact requirement. This ensures the element remains focusable and provides actionable feedback.
