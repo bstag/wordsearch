@@ -23,6 +23,11 @@ interface CellProps {
   foundColor: string;
 }
 
+const PALETTE = [
+  '', 'bg-green-200', 'bg-blue-200', 'bg-red-200', 'bg-yellow-200',
+  'bg-purple-200', 'bg-pink-200', 'bg-indigo-200', 'bg-orange-200'
+];
+
 const Cell = React.memo(({ x, y, char, selected, foundColor }: CellProps) => (
   <div
     data-cell-x={x}
@@ -55,21 +60,19 @@ export const PlayablePuzzleGrid = React.memo(({
   const gridRef = useRef<HTMLDivElement>(null);
 
   // ⚡ Performance: Pre-calculate found word colors to avoid O(Words * Length) checks per cell on every render.
+  // ⚡ Performance: Flat Uint8Array avoids allocating O(H) sub-arrays and O(W*H) string references.
   // This reduces render complexity from O(W*H * Words) to O(W*H) during interaction.
   const foundColorsGrid = useMemo(() => {
     const rows = grid.length;
     const cols = grid[0]?.length || 0;
-    const colors = Array(rows).fill(null).map(() => Array(cols).fill(''));
+    const colors = new Uint8Array(rows * cols);
 
-    const palette = [
-      'bg-green-200', 'bg-blue-200', 'bg-red-200', 'bg-yellow-200',
-      'bg-purple-200', 'bg-pink-200', 'bg-indigo-200', 'bg-orange-200'
-    ];
+    const paletteLength = 8; // We have 8 colors
 
     placedWords.forEach((word, idx) => {
       if (!foundWords.has(word.word)) return;
 
-      const colorClass = palette[idx % palette.length];
+      const colorIndex = (idx % paletteLength) + 1;
 
       const dx = Math.sign(word.endX - word.startX);
       const dy = Math.sign(word.endY - word.startY);
@@ -78,8 +81,9 @@ export const PlayablePuzzleGrid = React.memo(({
       for (let i = 0; i < length; i++) {
         const x = word.startX + i * dx;
         const y = word.startY + i * dy;
-        if (colors[y] && colors[y][x] !== undefined) {
-          colors[y][x] = colorClass;
+        const index = y * cols + x;
+        if (index >= 0 && index < colors.length) {
+          colors[index] = colorIndex;
         }
       }
     });
@@ -251,8 +255,9 @@ export const PlayablePuzzleGrid = React.memo(({
       {grid.map((row, y) => {
         const rowOffset = y * (grid[0]?.length || 0);
         return row.map((cell, x) => {
-          const selected = selectedIndices[rowOffset + x] === 1;
-          const foundColor = foundColorsGrid[y][x];
+          const index = rowOffset + x;
+          const selected = selectedIndices[index] === 1;
+          const foundColor = PALETTE[foundColorsGrid[index]];
           
           return (
             <Cell

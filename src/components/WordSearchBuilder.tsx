@@ -202,12 +202,13 @@ export default function WordSearchBuilder() {
   }, [width, height, wordsRaw, allowBackwards, allowDiagonals, difficulty, generate]);
 
   // Pre-calculate the solution grid for faster lookup (O(1) vs O(1) but avoids string allocs)
+  // ⚡ Performance: Flat Uint8Array avoids allocating O(H) sub-arrays and provides O(1) contiguous memory lookup
   const solutionGrid = useMemo(() => {
-    if (!puzzle) return [];
+    if (!puzzle) return new Uint8Array(0);
 
     const rows = puzzle.grid.length;
     const cols = puzzle.grid[0].length;
-    const grid = Array(rows).fill(null).map(() => Array(cols).fill(false));
+    const grid = new Uint8Array(rows * cols);
 
     puzzle.placedWords.forEach(word => {
       const dx = Math.sign(word.endX - word.startX);
@@ -217,8 +218,9 @@ export default function WordSearchBuilder() {
       for (let i = 0; i < length; i++) {
         const x = word.startX + i * dx;
         const y = word.startY + i * dy;
-        if (grid[y] && grid[y][x] !== undefined) {
-          grid[y][x] = true;
+        const index = y * cols + x;
+        if (index >= 0 && index < grid.length) {
+          grid[index] = 1;
         }
       }
     });

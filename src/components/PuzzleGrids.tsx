@@ -6,7 +6,7 @@ interface PuzzleGridProps {
   showGridLines: boolean;
   printCellSize: number;
   printFontSize: number;
-  solutionGrid?: boolean[][];
+  solutionGrid?: Uint8Array;
   highlightSolution?: boolean;
 }
 
@@ -29,9 +29,10 @@ const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSi
         '--font-size': `${printFontSize}px`,
       } as React.CSSProperties}
     >
-      {grid.map((row, y) => (
-        row.map((cell, x) => {
-          const isHighlighted = highlightSolution && solutionGrid?.[y]?.[x];
+      {grid.map((row, y) => {
+        const rowOffset = y * gridWidth;
+        return row.map((cell, x) => {
+          const isHighlighted = highlightSolution && solutionGrid?.[rowOffset + x] === 1;
           return (
             <div
               key={`${x}-${y}`}
@@ -41,8 +42,8 @@ const PuzzleGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSi
               {cell}
             </div>
           );
-        })
-      ))}
+        });
+      })}
     </div>
   );
 });
@@ -54,7 +55,7 @@ interface AnswerKeyGridProps {
   showGridLines: boolean;
   printCellSize: number;
   printFontSize: number;
-  solutionGrid: boolean[][];
+  solutionGrid: Uint8Array;
 }
 
 const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFontSize, solutionGrid }: AnswerKeyGridProps) => {
@@ -70,9 +71,10 @@ const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFon
         '--font-size': `${printFontSize}px`,
       } as React.CSSProperties}
     >
-      {grid.map((row, y) => (
-        row.map((cell, x) => {
-          const isSolution = solutionGrid?.[y]?.[x];
+      {grid.map((row, y) => {
+        const rowOffset = y * gridWidth;
+        return row.map((cell, x) => {
+          const isSolution = solutionGrid?.[rowOffset + x] === 1;
           return (
             <div
               key={`${x}-${y}`}
@@ -84,8 +86,8 @@ const AnswerKeyGrid = React.memo(({ grid, showGridLines, printCellSize, printFon
               </span>
             </div>
           );
-        })
-      ))}
+        });
+      })}
     </div>
   );
 });

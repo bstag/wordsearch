@@ -34,3 +34,7 @@
 ## 2025-03-20 - Random Sampling Optimization
 **Learning:** Using `Array.prototype.sort(() => 0.5 - Math.random())` to pick a few random items from a large pool is a severe performance anti-pattern. It forces an O(N log N) sort operation over the entire array, generates biased (non-uniform) random distributions in V8, and causes unnecessary memory churn.
 **Action:** When picking K random elements from a pool of N items, always use an O(K) partial Fisher-Yates shuffle: randomly pick an index, swap it with the last available element, and pop. This is mathematically uniform and orders of magnitude faster.
+
+## 2025-03-30 - Memory Layout: Boolean Arrays vs Typed Arrays
+**Learning:** React re-renders mapping over dynamic grids with conditional logic and string matching are computationally expensive. Creating `boolean[][]` grids (e.g. `Array(H).fill().map(()=>Array(W).fill(false))`) requires allocating O(H) sub-arrays. Similarly, `string[][]` caches for palette assignments cause memory fragmentation.
+**Action:** Replace 2D state arrays with a single flat `Uint8Array(H * W)` layout. This allows O(1) contiguous memory lookups during the render loop and removes sub-array allocation pressure on every state change, significantly speeding up large grid rendering.
