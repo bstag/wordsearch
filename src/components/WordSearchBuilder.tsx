@@ -391,7 +391,7 @@ export default function WordSearchBuilder() {
                 max="10"
                 value={difficulty}
                 onChange={(e) => setDifficulty(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                 aria-label="Difficulty level (number of distractors)"
                 aria-valuetext={`${difficulty} out of 10, ${
                   difficulty <= 2 ? 'Easy' :
@@ -417,9 +417,13 @@ export default function WordSearchBuilder() {
                 </label>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setWordsRaw('')}
-                    className="text-xs flex items-center gap-1 text-gray-500 hover:text-red-600 transition-colors"
-                    title="Clear word list"
+                    onClick={() => {
+                      if (!wordsRaw) return;
+                      setWordsRaw('');
+                    }}
+                    aria-disabled={!wordsRaw}
+                    className={`text-xs flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 rounded-sm transition-colors ${!wordsRaw ? 'text-gray-400 opacity-50 cursor-not-allowed' : 'text-gray-500 hover:text-red-600'}`}
+                    title={!wordsRaw ? "Word list is already empty" : "Clear word list"}
                     aria-label="Clear word list"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -427,7 +431,7 @@ export default function WordSearchBuilder() {
                   </button>
                   <button
                     onClick={handleRandomizeWords}
-                    className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-800 transition-colors"
+                    className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 rounded-sm"
                     title="Generate random words"
                   >
                     <Dice5 className="w-3 h-3" />
@@ -484,7 +488,7 @@ export default function WordSearchBuilder() {
                 }}
                 aria-disabled={isGenerating || invalidWords.length > 0 || !isWordCountValid}
                 title={invalidWords.length > 0 ? "Please fix invalid words before generating" : !isWordCountValid ? "Please fix word count before generating" : isGenerating ? "Generating..." : "Regenerate Puzzle"}
-                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(isGenerating || invalidWords.length > 0 || !isWordCountValid) ? 'bg-indigo-600 opacity-75 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 ${(isGenerating || invalidWords.length > 0 || !isWordCountValid) ? 'bg-indigo-600 opacity-75 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
                 {isGenerating ? 'Generating...' : 'Regenerate Puzzle'}
@@ -505,7 +509,7 @@ export default function WordSearchBuilder() {
                 }}
                 aria-disabled={!puzzle || invalidWords.length > 0 || !isWordCountValid}
                 title={invalidWords.length > 0 ? "Fix invalid words to play" : !isWordCountValid ? "Fix word count to play" : !puzzle ? "Generate a puzzle to play" : "Play Online"}
-                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${(!puzzle || invalidWords.length > 0 || !isWordCountValid) ? 'bg-green-600 opacity-75 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500 ${(!puzzle || invalidWords.length > 0 || !isWordCountValid) ? 'bg-green-600 opacity-75 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
               >
                 <Play className="w-4 h-4 mr-2" />
                 Play Online
@@ -520,7 +524,7 @@ export default function WordSearchBuilder() {
                 }}
                 aria-disabled={!puzzle || invalidWords.length > 0 || !isWordCountValid}
                 title={invalidWords.length > 0 ? "Fix invalid words to print" : !isWordCountValid ? "Fix word count to print" : !puzzle ? "Generate a puzzle to print" : "Print Puzzle"}
-                className={`w-full flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(!puzzle || invalidWords.length > 0 || !isWordCountValid) ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}
+                className={`w-full flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 ${(!puzzle || invalidWords.length > 0 || !isWordCountValid) ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}
               >
                 <Printer className="w-4 h-4 mr-2" />
                 Print Puzzle
@@ -536,7 +540,7 @@ export default function WordSearchBuilder() {
                 aria-live="polite"
                 aria-disabled={invalidWords.length > 0 || !isWordCountValid}
                 title={invalidWords.length > 0 ? "Fix invalid words to share" : !isWordCountValid ? "Fix word count to share" : "Share Configuration"}
-                className={`w-full flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${(invalidWords.length > 0 || !isWordCountValid) ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}
+                className={`w-full flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 ${(invalidWords.length > 0 || !isWordCountValid) ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}
               >
                 {isCopied ? (
                   <Check className="w-4 h-4 mr-2 text-green-600" />
@@ -597,7 +601,7 @@ export default function WordSearchBuilder() {
                       focusOnReturnRef.current = true;
                       setRunMode(false);
                     }}
-                    className="flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                    className="flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 rounded-sm"
                   >
                     <ArrowLeft className="w-4 h-4 mr-1.5" />
                     Back to Config
@@ -639,7 +643,7 @@ export default function WordSearchBuilder() {
                 {puzzle && !runMode && (
                 <button
                   onClick={() => setShowSolution(!showSolution)}
-                  className="flex items-center text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+                  className="flex items-center text-sm text-indigo-600 hover:text-indigo-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 rounded-sm"
                   aria-label={showSolution ? "Hide solution in preview" : "Show solution in preview"}
                   aria-pressed={showSolution}
                 >
@@ -755,7 +759,7 @@ export default function WordSearchBuilder() {
                 </p>
                 <button
                   onClick={handleRandomizeWords}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 transition-colors"
                 >
                   <Dice5 className="w-4 h-4 mr-2" />
                   Use Random Words
