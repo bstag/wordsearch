@@ -29,6 +29,11 @@ cd android && ./gradlew assembleRelease
 
 Output: `android/app/build/outputs/apk/release/app-release.apk`
 
+That APK is ~78 MB because it is *universal* — it packs native libraries for
+all four ABIs (arm64-v8a, armeabi-v7a, x86, x86_64) plus Hermes. Play delivers
+per-device slices from an AAB, so the download users actually get is far
+smaller; `bundleRelease` is the right artifact for distribution.
+
 Environment this machine needs (see the main README for the full list):
 
 ```bash

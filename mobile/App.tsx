@@ -214,6 +214,24 @@ function AppContent() {
   const handlePrint = useCallback(async () => {
     if (!puzzle) return;
     setIsPrinting(true);
+
+    // printAsync can hang forever on Android: observed on the first invocation
+    // after a fresh install, where the WebView it renders into starts up but the
+    // print dialog never appears and the promise never settles. Without this the
+    // button is stuck disabled on "Preparing..." for the rest of the session.
+    // Android-only because the docs say it resolves as soon as the dialog shows,
+    // whereas on iOS it waits for printing to start and can legitimately be slow.
+    const watchdog =
+      Platform.OS === 'android'
+        ? setTimeout(() => {
+            setIsPrinting(false);
+            Alert.alert(
+              'Print is taking longer than expected',
+              'The print dialog did not open. Tap Print / Save PDF to try again.'
+            );
+          }, 20000)
+        : null;
+
     try {
       await Print.printAsync({ html: buildPuzzleHtml(puzzle, config) });
     } catch (err) {
@@ -223,6 +241,7 @@ function AppContent() {
         Alert.alert('Print failed', message);
       }
     } finally {
+      if (watchdog) clearTimeout(watchdog);
       setIsPrinting(false);
     }
   }, [puzzle, config]);
