@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import "./globals.css";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,10 +14,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Pages set their own `alternates.canonical`; don't add one here or every
+// page without an override would claim to be the homepage.
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Word Search Generator | Create & Play Online",
-    template: "%s | Word Search Generator"
+    default: "Free Word Search Generator | Make, Print & Play Puzzles",
+    template: `%s | ${SITE_NAME}`
   },
   description: "Free online word search maker. Create custom printable puzzles, play online, or share with friends. No signup required.",
   keywords: ["word search", "puzzle maker", "word search generator", "educational games", "classroom tools", "printable puzzles"],
@@ -27,10 +31,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://wordsearch.stagware.com", // Placeholder URL
+    url: "/",
     title: "Word Search Generator | Create & Play Online",
     description: "Create, print, and share custom word search puzzles instantly.",
-    siteName: "Word Search Generator",
+    siteName: SITE_NAME,
   },
   twitter: {
     card: "summary_large_image",

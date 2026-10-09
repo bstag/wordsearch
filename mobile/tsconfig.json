@@ -1,0 +1,17 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@shared/*": ["../src/lib/*"],
+      // src/lib lives outside this project, so its own imports would otherwise
+      // resolve against the (uninstalled) web app's node_modules.
+      "zod": ["./node_modules/zod"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../src/lib/**/*.ts"
+  ]
+}
