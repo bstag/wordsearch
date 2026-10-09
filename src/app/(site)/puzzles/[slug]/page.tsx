@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { THEMED_PUZZLES, buildThemedPuzzle, getThemedPuzzle } from '@/lib/themes';
+import { THEMED_PUZZLES, getThemedPuzzle, themedPlayerProps } from '@/lib/themes';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import ThemedPuzzlePlayer from '@/components/ThemedPuzzlePlayer';
 
@@ -39,8 +39,6 @@ export default async function ThemedPuzzlePage({ params }: Props) {
   const theme = getThemedPuzzle((await params).slug);
   if (!theme) notFound();
 
-  const initialPuzzle = buildThemedPuzzle(theme);
-
   const related = THEMED_PUZZLES.filter(p => p.category === theme.category && p.slug !== theme.slug);
 
   const jsonLd = {
@@ -73,14 +71,7 @@ export default async function ThemedPuzzlePage({ params }: Props) {
           <p className="text-gray-600 max-w-2xl mx-auto">{theme.description}</p>
         </header>
 
-        <ThemedPuzzlePlayer
-          title={`${theme.title} Word Search`}
-          words={theme.words}
-          width={theme.width}
-          height={theme.height}
-          difficulty={theme.difficulty}
-          initialPuzzle={initialPuzzle}
-        />
+        <ThemedPuzzlePlayer {...themedPlayerProps(theme)} />
 
         {related.length > 0 && (
           <section className="mt-12">

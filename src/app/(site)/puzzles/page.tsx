@@ -28,7 +28,7 @@ export default function PuzzlesIndexPage() {
         <header className="mb-8 text-center">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">Free Word Search Puzzles</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Pick a theme and play right in your browser, or open any puzzle in the generator to change the words and print it with an answer key.
+            Every puzzle comes in Easy, Medium, and Hard. Pick a theme and play right in your browser, or open any puzzle in the generator to change the words and print it with an answer key.
           </p>
         </header>
 

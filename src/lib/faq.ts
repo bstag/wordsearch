@@ -25,6 +25,10 @@ export const FAQ: FaqItem[] = [
     answer: 'Words always run across and down. You can also allow diagonal words and backwards words (right to left, bottom to top) to make the puzzle harder.',
   },
   {
+    question: 'What do Easy, Medium, and Hard mean on the ready-made puzzles?',
+    answer: 'Easy puzzles hide words only across and down, with no decoys, which suits early readers. Medium adds diagonal words and a few decoys. Hard uses a bigger grid, adds backwards words, and hides many more decoys.',
+  },
+  {
     question: 'What does the difficulty setting do?',
     answer: 'Higher difficulty adds decoy words: near-misses of your real words with one letter changed. They make the grid harder to scan because almost-right words pop out at you. At difficulty 0 there are no decoys.',
   },

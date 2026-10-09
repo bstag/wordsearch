@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Link2, MousePointerClick, PenLine, Printer, SlidersHorizontal, Smartphone } from 'lucide-react';
 import ThemedPuzzlePlayer from '@/components/ThemedPuzzlePlayer';
 import LegacyShareRedirect from '@/components/LegacyShareRedirect';
-import { buildThemedPuzzle, getCategories, getFeaturedPuzzle } from '@/lib/themes';
+import { getCategories, getFeaturedPuzzle, themedPlayerProps } from '@/lib/themes';
 import { FAQ } from '@/lib/faq';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 
@@ -92,14 +92,7 @@ export default function HomePage() {
             <Link href={`/puzzles/${featured.slug}`} className="hover:text-indigo-700">{featured.title} Word Search</Link>
           </h2>
         </div>
-        <ThemedPuzzlePlayer
-          title={`${featured.title} Word Search`}
-          words={featured.words}
-          width={featured.width}
-          height={featured.height}
-          difficulty={featured.difficulty}
-          initialPuzzle={buildThemedPuzzle(featured)}
-        />
+        <ThemedPuzzlePlayer {...themedPlayerProps(featured)} />
       </section>
 
       {/* How it works */}
