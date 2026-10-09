@@ -2,24 +2,25 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { generatePuzzle, GeneratedPuzzle } from '@/lib/generator';
+import { generatePuzzle, GeneratedPuzzle, GeneratorConfig } from '@/lib/generator';
+import { LEVELS, Level } from '@/lib/levels';
 import { PlayablePuzzleGrid } from './PlayablePuzzleGrid';
 import { Check, MousePointerClick, Printer, RefreshCw, Trophy } from 'lucide-react';
 
 interface ThemedPuzzlePlayerProps {
   title: string;
-  words: string[];
-  width: number;
-  height: number;
-  difficulty: number;
+  configs: Record<Level, GeneratorConfig>;
   // Generated at build time from the theme's seed so the static HTML and the
   // first client render show the same grid.
-  initialPuzzle: GeneratedPuzzle;
+  initialPuzzles: Record<Level, GeneratedPuzzle>;
+  defaultLevel: Level;
 }
 
-export default function ThemedPuzzlePlayer({ title, words, width, height, difficulty, initialPuzzle }: ThemedPuzzlePlayerProps) {
-  const [puzzle, setPuzzle] = useState<GeneratedPuzzle>(initialPuzzle);
+export default function ThemedPuzzlePlayer({ title, configs, initialPuzzles, defaultLevel }: ThemedPuzzlePlayerProps) {
+  const [level, setLevel] = useState<Level>(defaultLevel);
+  const [puzzle, setPuzzle] = useState<GeneratedPuzzle>(initialPuzzles[defaultLevel]);
   const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
+  const config = configs[level];
 
   const totalUniqueWords = useMemo(() => new Set(puzzle.placedWords.map(w => w.word)).size, [puzzle]);
   const isComplete = totalUniqueWords > 0 && foundWords.size === totalUniqueWords;
@@ -28,21 +29,48 @@ export default function ThemedPuzzlePlayer({ title, words, width, height, diffic
     setFoundWords(prev => new Set(prev).add(word));
   }, []);
 
+  const handleLevelChange = (next: Level) => {
+    if (next === level) return;
+    setLevel(next);
+    setPuzzle(initialPuzzles[next]);
+    setFoundWords(new Set());
+  };
+
   const handleNewGrid = () => {
-    setPuzzle(generatePuzzle({ width, height, words, allowBackwards: true, allowDiagonals: true, difficulty }));
+    setPuzzle(generatePuzzle(config));
     setFoundWords(new Set());
   };
 
   const builderQuery = {
     title,
-    words: words.join(','),
-    width: String(width),
-    height: String(height),
-    difficulty: String(difficulty),
+    words: config.words.join(','),
+    width: String(config.width),
+    height: String(config.height),
+    difficulty: String(config.difficulty),
+    backwards: String(config.allowBackwards),
+    diagonals: String(config.allowDiagonals),
   };
 
   return (
     <div>
+      <div className="flex flex-col items-center mb-4">
+        <div role="group" aria-label="Difficulty" className="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
+          {LEVELS.map(l => (
+            <button
+              key={l.id}
+              onClick={() => handleLevelChange(l.id)}
+              aria-pressed={level === l.id}
+              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                level === l.id ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-gray-500">{LEVELS.find(l => l.id === level)?.summary}</p>
+      </div>
+
       <div
         className={`mb-4 mx-auto max-w-md p-3 rounded-lg text-center font-medium transition-colors border ${
           isComplete ? 'bg-green-100 text-green-800 border-green-200' : 'bg-indigo-50 text-indigo-700 border-indigo-100'
