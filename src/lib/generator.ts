@@ -36,7 +36,20 @@ const DIRECTIONS = {
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
+// Deterministic PRNG so the same seed always yields the same grid. Pre-made
+// puzzles are rendered at build time and must hydrate to the identical grid.
+export function seededRandom(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export function generatePuzzle(config: GeneratorConfig, random: () => number = Math.random): GeneratedPuzzle {
   const validatedConfig = GeneratorConfigSchema.parse(config);
   const { width, height, words, allowBackwards, allowDiagonals, difficulty } = validatedConfig;
 
@@ -102,11 +115,11 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       // Pick a random valid direction configuration
-      const config = validConfigs[Math.floor(Math.random() * validConfigs.length)];
+      const config = validConfigs[Math.floor(random() * validConfigs.length)];
       const { dir, minX, maxX, minY, maxY } = config;
 
-      const startX = Math.floor(Math.random() * (maxX - minX)) + minX;
-      const startY = Math.floor(Math.random() * (maxY - minY)) + minY;
+      const startX = Math.floor(random() * (maxX - minX)) + minX;
+      const startY = Math.floor(random() * (maxY - minY)) + minY;
 
       // Check collisions
       let valid = true;
@@ -174,14 +187,14 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
   if (distractorCandidates.length > 0) {
     for (let i = 0; i < distractorCount; i++) {
       // Pick random source from pre-cleaned candidates
-      const clean = distractorCandidates[Math.floor(Math.random() * distractorCandidates.length)];
+      const clean = distractorCandidates[Math.floor(random() * distractorCandidates.length)];
 
-      const charIndex = Math.floor(Math.random() * clean.length);
+      const charIndex = Math.floor(random() * clean.length);
       const originalChar = clean[charIndex];
 
       // Pick a random char that is NOT the original char
       const originalCharCode = originalChar.charCodeAt(0) - 65;
-      const offset = Math.floor(Math.random() * 25) + 1; // 1 to 25
+      const offset = Math.floor(random() * 25) + 1; // 1 to 25
       const newCharCode = (originalCharCode + offset) % 26;
       const newChar = ALPHABET[newCharCode];
 
@@ -198,7 +211,7 @@ export function generatePuzzle(config: GeneratorConfig): GeneratedPuzzle {
     for (let x = 0; x < width; x++) {
       const val = grid[yOffset + x];
       if (val === 0) {
-        row[x] = ALPHABET[Math.floor(Math.random() * 26)];
+        row[x] = ALPHABET[Math.floor(random() * 26)];
       } else {
         row[x] = String.fromCharCode(val);
       }

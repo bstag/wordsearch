@@ -8,6 +8,7 @@ import { PuzzleGrid, AnswerKeyGrid } from './PuzzleGrids';
 import { PlayablePuzzleGrid } from './PlayablePuzzleGrid';
 import { Printer, RefreshCw, Settings, Type, Github, AlertCircle, Share2, Check, Eye, EyeOff, Play, Dice5, ArrowLeft, Trophy, MousePointerClick, Trash2 } from 'lucide-react';
 import { z } from 'zod';
+import Link from 'next/link';
 
 // Security: Custom parsers to enforce limits on URL parameters
 const createBoundedIntegerParser = (min: number, max: number) => createParser({
@@ -282,7 +283,7 @@ export default function WordSearchBuilder() {
         <div className="w-full md:w-80 bg-white border-r border-gray-200 p-6 flex-shrink-0 print:hidden overflow-y-auto h-screen sticky top-0">
           <div className="mb-6 flex items-center gap-2 text-indigo-600">
             <Settings className="w-6 h-6" />
-            <h1 className="text-xl font-bold">Config</h1>
+            <h2 className="text-xl font-bold">Config</h2>
           </div>
 
           <div className="space-y-6">
@@ -550,7 +551,12 @@ export default function WordSearchBuilder() {
                 {isCopied ? 'Copied Link!' : 'Share Configuration'}
               </button>
 
-              <div className="pt-4 border-t border-gray-200 mt-4">
+              <div className="pt-4 border-t border-gray-200 mt-4 space-y-3">
+                <nav aria-label="Site" className="flex items-center justify-center gap-4 text-sm">
+                  <Link href="/" className="text-indigo-600 hover:text-indigo-800 transition-colors">Home</Link>
+                  <Link href="/puzzles" className="text-indigo-600 hover:text-indigo-800 transition-colors">Puzzles</Link>
+                  <Link href="/faq" className="text-indigo-600 hover:text-indigo-800 transition-colors">FAQ</Link>
+                </nav>
                 <a 
                   href="https://github.com/bstag/wordsearch" 
                   target="_blank" 
